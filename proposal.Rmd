@@ -8,7 +8,7 @@ output: html_document
 # MPD Use of Force Final Project
 
 ```{r}
-
-
-
+# https://mpdc.dc.gov/node/1635896
+df <- read.csv("UoF_mpd_2021_public.csv")
+df
 ```
