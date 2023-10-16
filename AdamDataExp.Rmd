@@ -1,0 +1,69 @@
+---
+title: "AdamDataExp"
+author: "Adam Billen"
+date: "10/15/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+library(tibble)
+```
+In my mind, the most interesting variables are likely:
+-IncidentDistrict
+-uof_type
+-IncidentDate
+-Disposition
+-department_action
+-OfficerGender
+-OfficerRace
+-subject_age
+-subject_race
+-subject_gender
+-serious
+
+In my mind, we should remove/ignore:
+-IncidentTime
+-CaseStatus (I don't think whether the case is close should be an interesting predictor of anything)
+-DateClosed (Again, how long ago the case closed seemingly doesn't tell us much)
+-Officer_id (unless we want to look at individual officers we can ignore this)
+-OfficerAssignment (I could be wrong on this one)
+-CD (civil disturbance doesn't seem interesting)
+-animal (we should just remove uses of force against animals)
+
+
+Hypotheses:
+
+
+```{r}
+mpd_dat <- read.csv('UoF_mpd_2021_public.csv')
+head(mpd_dat)
+View(mpd_dat)
+
+ggplot(data = mpd_dat, mapping = aes(x = IncidentDistrict)) + 
+  geom_bar() +
+    facet_wrap(~uof_type)
+
+ggplot(data = mpd_dat, mapping = aes(x = serious)) + 
+  geom_bar() +
+    facet_wrap(~subject_race)
+
+ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
+  geom_bar()
+
+ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
+  geom_bar() +
+    facet_wrap(~OfficerRace)
+
+
+
+
+```
+
