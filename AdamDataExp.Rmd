@@ -28,6 +28,7 @@ In my mind, the most interesting variables are likely:
 -subject_race
 -subject_gender
 -serious
+-CD (civil disturbance)
 
 In my mind, we should remove/ignore:
 -IncidentTime
@@ -35,12 +36,16 @@ In my mind, we should remove/ignore:
 -DateClosed (Again, how long ago the case closed seemingly doesn't tell us much)
 -Officer_id (unless we want to look at individual officers we can ignore this)
 -OfficerAssignment (I could be wrong on this one)
--CD (civil disturbance doesn't seem interesting)
 -animal (we should just remove uses of force against animals)
 
 
 Hypotheses:
+We hypothesize that Black people/African Americans are over represented in use of force cases in Washington, DC. They represented 45% of the DC population in 2021, so if > 45% of the subjects of uses of force in our data are Black/African American, they would be over represented. We also hypothesize that white police officers are over represented in use of force cases in Washington, DC. As of 2021, 34.55% of officers were white. If the race of officers in use of force cases > 34.55%, this would indicate overrepresentation.
 
+We are particularly interested in predicting the "disposition," or how the department classified a use of force, based on the variables available to us. We hypothesize that uses of force labeled unjustified may be more common in wards 7 and 8 that are more diverse and poorer. The location variable which is available, "IncidentDistrict," is police district rather than ward, but we can use the rough lines of the police district to approximate these areas. We could do the same type of prediction but for a binary variable like "serious," which represents the severity of a given use of force. 
+
+Methods:
+Our predictors for  these models will be the police district in which the use of force took place, the date of the incident, the gender and race of the officer and the age, race, and gender of the subject. The target wil be the type of use of force, the disposition, the department action, or the severity of the force. We won't include the other potential targets as predictors for one another, because severity, for example, will likely be a very high predictor of the type of use of force, muddling our models. We will not include variables such as case status, when a case closed, the anonymized officer IDs, or officer assignments as predictors. We will remove all uses of force against animals, as we are only interested in cases involving humans.
 
 ```{r}
 mpd_dat <- read.csv('UoF_mpd_2021_public.csv')
@@ -61,9 +66,5 @@ ggplot(data = mpd_dat, mapping = aes(x = subject_race)) +
 ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
   geom_bar() +
     facet_wrap(~OfficerRace)
-
-
-
-
 ```
 
