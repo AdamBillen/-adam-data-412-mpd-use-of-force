@@ -104,5 +104,9 @@ ggplot(subset(officer_by_district, OfficerAssignment %in% c("1D", "2D", "3D", "4
 ```
 
 ```{r}
-
+ggplot(mpd_dat, aes(x = disposition, fill = OfficerAssignment %in% c("1D", "2D", "3D", "4D", "5D", "6D", "7D"))) +
+  geom_bar() +
+  labs(title = "Dispositions for Each District") +
+  xlab("Dispositions") +
+  ylab("District") 
 ```
