@@ -81,7 +81,7 @@ ggplot(data = mpd_dat, mapping = aes(x = serious)) +
 ```
 
 ```{r}
-ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
+ggplot(data = mpd_dat, mapping = aes(x = OfficerRace)) + 
   geom_bar()
 
 ```
