@@ -5,6 +5,12 @@ date: "2023-10-15"
 output: html_document
 ---
 
+<style type="text/css">
+  body{
+  font-size: 12pt;
+}
+</style>
+
 # MPD Use of Force Final Project Proposal
 
 ```{r}
@@ -28,6 +34,10 @@ Hypotheses: We hypothesize that Black people/African Americans are over represen
 We are particularly interested in predicting the "disposition," or how the department classified a use of force, based on the variables available to us. We hypothesize that uses of force labeled unjustified may be more common in wards 7 and 8 that are more diverse and poorer. The location variable which is available, "IncidentDistrict," is police district rather than ward, but we can use the rough lines of the police district to approximate these areas. We could do the same type of prediction but for a binary variable like "serious," which represents the severity of a given use of force.
 
 Methods: Our predictors for these models will be the police district in which the use of force took place, the date of the incident, the gender and race of the officer and the age, race, and gender of the subject. The target wil be the type of use of force, the disposition, the department action, or the severity of the force. We won't include the other potential targets as predictors for one another, because severity, for example, will likely be a very high predictor of the type of use of force, muddling our models. We will not include variables such as case status, when a case closed, the anonymized officer IDs, or officer assignments as predictors. We will remove all uses of force against animals, as we are only interested in cases involving humans.
+
+
+
+Datawise we should look at phoebe's article to find confounding/overlapping stuff
 
 ```{r}
 mpd_dat <- read.csv('UoF_mpd_2021_public.csv')
