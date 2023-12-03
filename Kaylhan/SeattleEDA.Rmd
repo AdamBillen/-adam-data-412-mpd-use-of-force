@@ -1,0 +1,86 @@
+---
+title: "Seattle_EDA"
+author: "Kaylhan Garcia"
+date: "2023-12-03"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Seattle Exploratory Data Analysis
+
+```{r}
+#importing necessary libraries
+library(tidyverse)
+library(conflicted)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+library(tibble)
+```
+
+```{r}
+setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
+list.files()
+```
+
+```{r}
+library(readr)
+seattle <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/Use_Of_Force_Seattle.csv")
+head(seattle)
+```
+
+Finding out all the columns
+
+```{r}
+colnames(seattle)
+```
+
+```{r}
+seattle <- na.omit(seattle)
+```
+
+-   He's really emphasising the regressions but also doing exploration on the relationship between our dependent and independent for each variable
+
+-   So it would be most helpful if you guys built ggplots of independent variables vs dependent variables
+
+-   Or if the independent variable isn't continuous then like a histogram vibe
+
+## Predicting Incident Type
+
+Independent: subject race or gender
+
+dependent: incident type
+
+```{r}
+unique(seattle$Incident_Type)
+```
+
+OIS stands for Office-Involved Shooting
+
+```{r}
+ggplot(seattle, aes(x = Subject_Race, fill = Incident_Type)) +
+  geom_bar(position = "stack") +
+  labs(title = "Distribution of Incident Types by Subject Race",
+       x = "Subject Race",
+       y = "Count",
+       fill = "Incident Type") +
+  theme_minimal()
+```
+
+```{r}
+library(ggplot2)
+
+level3_data <- subset(seattle, Incident_Type %in% c("Level 3 - OIS", "Level 3 - Use of Force"))
+
+ggplot(level3_data, aes(x = Subject_Race, fill = Incident_Type)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Distribution of Level 3 Incidents by Subject Race",
+       x = "Subject Race",
+       y = "Count",
+       fill = "Incident Type") 
+```
+
+Interested to see Subject_Race by Precinct and visualize the count and race difference.
