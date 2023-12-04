@@ -63,7 +63,7 @@ assignments as predictors. We will remove all uses of force against
 animals, as we are only interested in cases involving humans.
 
 ```{r}
-mpd_dat <- read.csv('UoF_mpd_2021_public.csv')
+mpd_dat <- read.csv('../data/UoF_mpd_2021_public.csv')
 #head(mpd_dat)
 #View(mpd_dat)
 
