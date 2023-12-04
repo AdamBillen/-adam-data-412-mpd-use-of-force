@@ -1,0 +1,72 @@
+---
+title: "Regressions"
+author: "Adam Billen"
+date: "12/3/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+library(nnet)
+library(MASS)
+```
+
+
+```{r}
+mpd_dat <- read.csv('../data/UoF_mpd_2021_public.csv')
+sea_dat <- read.csv('../data/Use_Of_Force_Seattle.csv')
+chi_data <- read.csv('../data/UofF_external_2020_public_214.csv')
+```
+
+MPD regression
+
+For this study, we will conduct four multiple regressions predicting the
+use of force in Washington, DC by the Metropolitan Police Department.
+Our predictors will be the police district in which the use of force
+took place, the date of the incident, the gender and race of the officer
+and the age, race, and gender of the subject. The targets will be the
+type of use of force, the disposition, the department action, and the
+severity of the force. We won't include the other potential targets as
+predictors for one another because severity, for example, will likely be
+a very high predictor of the type of use of force, muddling our models.
+We will not include variables such as case status, when a case closed,
+the anonymized officer IDs, or officer assignments as predictors. We
+will remove all uses of force against animals, as we are only interested
+in cases involving humans.\
+
+
+```{r}
+age_breaks <- c(18, 25, 35, 45, 55, 65)
+
+mpd_dat <- mpd_dat %>%
+  mutate(
+    subject_age = as.numeric(subject_age),
+    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18-24", "25-34", "35-44", "45-54", "55-65"), include.lowest = TRUE, right = FALSE))
+
+encoded_data <- model.matrix(~ . - 1, data = mpd_dat, exclude = c("IS_ID", "IncidentDate", "IncidentTime", "CaseStatus", "DateClosed", "disposition", 
+                                                                  "Officer_id", "DateClosed", "CD", "animal", "department_action", "serious"))
+
+encoded_data <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender - 1, data = mpd_dat)
+
+your_data_encoded <- cbind(mpd_dat, encoded_data)
+
+
+ForceType <- as_factor(mpd_dat$uof_type)
+IncidentDistrict <- as_factor(mpd_dat$IncidentDistrict)
+OfficerGender <- as_factor(mpd_dat$OfficerGender)
+OfficerRace <- as_factor(mpd_dat$OfficerRace)
+SubjectAge <- as_factor(mpd_dat$AgeBands)
+SubjectRace <- as_factor(mpd_dat$subject_race)
+SubjectGender <- as_factor(mpd_dat$subject_gender)
+
+model <- polr(ForceType ~ IncidentDistrict + OfficerGender + ForceType + OfficerRace + SubjectAge + SubjectRace + SubjectGender, data = mpd_dat)
+```
+
+```{r}
+ggplot()
+```
+
+
