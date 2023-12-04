@@ -9,7 +9,9 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Seattle Exploratory Data Analysis
+# Seattle, WA Exploratory Data Analysis
+
+<https://www.seattle.gov/police/information-and-data/data/use-of-force-data/use-of-force-dataset>
 
 ```{r}
 #importing necessary libraries
@@ -84,3 +86,122 @@ ggplot(level3_data, aes(x = Subject_Race, fill = Incident_Type)) +
 ```
 
 Interested to see Subject_Race by Precinct and visualize the count and race difference.
+
+Sector is smaller than precinct
+
+Beat is more smaller than sector.
+
+```{r}
+ggplot(seattle, aes(x = Precinct, fill = Subject_Race)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race and Precinct",
+       x = "Precinct",
+       y = "Count",
+       fill = "Subject Race") +
+  theme_minimal()
+```
+
+```{r}
+selected_races <- c("White", "Black or African American", "Hispanic or Latino", "Asian", "Unspecified")
+filtered_data <- subset(seattle, Subject_Race %in% selected_races)
+
+ggplot(filtered_data, aes(x = Precinct, fill = Subject_Race)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race in South Precinct",
+       x = "Precinct",
+       y = "Count",
+       fill = "Subject Race")
+```
+
+Data set includes time range from 2014 (?) to 2023
+
+Population of Seattle: 749,256 (2022)
+
+by Race/Ethnicity:
+
+White alone: 64.9%
+
+Black: 6.8%
+
+American Indian 0.5%
+
+Asian 16.3%
+
+Native Hawaiian 0.2%
+
+Two or more Races 8.8%
+
+Hispanic or Latino 7.2%
+
+White alone, not Hispanic or Latino 62.2%
+
+<https://www.census.gov/quickfacts/fact/table/seattlecitywashington/RHI525222>
+
+-   *West Precinct is where Downtown Seattle is located*
+
+```{r}
+ggplot(seattle, aes(x = Sector, fill = Subject_Race)) +
+  geom_bar(stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race and Sector",
+       x = "Sector",
+       y = "Count",
+       fill = "Subject Race") +
+  theme_minimal()
+
+```
+
+Edward, King, and David Sector are the **highest**
+
+**Lowest**: William, John, and Charles
+
+#### Let's dive deeper into the highest and lowest sectors by incidents
+
+```{r}
+highest_sectors <- c("EDWARD", "KING", "DAVID")
+lowest_sectors <- c("WILLIAM", "JOHN", "CHARLIE")
+```
+
+```{r}
+filtered_high_sector <- subset(seattle, Sector %in% highest_sectors)
+
+ggplot(filtered_high_sector, aes(x = Sector, fill = Subject_Race)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race in Highest Sectors",
+       x = "Sector",
+       y = "Count",
+       fill = "Subject Race") +
+  theme_minimal()
+```
+
+\
+
+```{r}
+filtered_low_sector <- subset(seattle, Sector %in% lowest_sectors)
+
+ggplot(filtered_low_sector, aes(x = Sector, fill = Subject_Race)) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race in Lowest Sectors",
+       x = "Sector",
+       y = "Count",
+       fill = "Subject Race") +
+  theme_minimal()
+```
+
+```{r}
+unique(seattle$Sector)
+```
+
+### By Beat 
+
+```{r}
+ggplot(seattle, aes(x = Beat, fill = Subject_Race)) +
+  geom_bar(stat = "count") +
+  labs(title = "Distribution of Incidents by Subject Race and Beat",
+       x = "Beat",
+       y = "Count",
+       fill = "Subject Race") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+E2 significantly has a higher number of incidents occuring
