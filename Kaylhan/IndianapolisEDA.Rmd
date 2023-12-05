@@ -38,3 +38,5 @@ indiana_2020 <- indiana[format(indiana$OCCURRED_DT, "%Y") == "2020", ]
 
 view(indiana_2020)
 ```
+
+checking if valid
