@@ -24,13 +24,14 @@ library(tibble)
 ```
 
 ```{r}
-setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
+# setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
 list.files()
 ```
 
 ```{r}
 library(readr)
-seattle <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/Use_Of_Force_Seattle.csv")
+# seattle <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/Use_Of_Force_Seattle.csv")
+seattle <- read_csv("../data/UOF_Seattle.csv")
 head(seattle)
 ```
 
@@ -147,7 +148,6 @@ ggplot(seattle, aes(x = Sector, fill = Subject_Race)) +
        y = "Count",
        fill = "Subject Race") +
   theme_minimal()
-
 ```
 
 Edward, King, and David Sector are the **highest**
