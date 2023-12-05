@@ -191,7 +191,7 @@ ggplot(filtered_low_sector, aes(x = Sector, fill = Subject_Race)) +
 unique(seattle$Sector)
 ```
 
-### By Beat 
+### By Beat
 
 ```{r}
 ggplot(seattle, aes(x = Beat, fill = Subject_Race)) +
@@ -205,3 +205,5 @@ ggplot(seattle, aes(x = Beat, fill = Subject_Race)) +
 ```
 
 E2 significantly has a higher number of incidents occurring
+
+just checking if valid
