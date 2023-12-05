@@ -131,4 +131,33 @@ model_portland_2020 <- glm(serious ~ Officer_PrecinctDetectives + Officer_Precin
 
 summary(model_portland_2020)
 ```
+Indianapolis
+```{r}
+ind_dat <- read_csv("../data/UOF_Indianapolis.csv")
 
+ind_dat_2020 <- ind_dat %>%
+  mutate_all(~str_replace_all(., "/", "_")) %>%
+  mutate_all(~str_replace_all(., " ", "_")) %>%
+  mutate_all(~str_replace_all(., ",", "_")) %>%
+  mutate_all(~str_replace_all(., "-", "_")) %>%
+  mutate_all(~str_replace_all(., "\\(|\\)", "")) %>%
+  mutate_all(~str_replace_all(., ":", "_")) %>%
+  mutate_all(~str_replace_all(., "__", "_")) %>%
+  mutate(datetime = ymd(OCCURRED_DT)) %>%
+  filter(year(datetime) == 2020) %>%
+   mutate(OFF_AGE = as.numeric(OFF_AGE),
+    OFF_AGE_BANDS = cut(OFF_AGE, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  mutate(CIT_AGE = as.numeric(CIT_AGE),
+    CIT_AGE_BANDS = cut(CIT_AGE, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE))
+
+serious_cats <- c("Less_Lethal_Pepperball", "Lethal_Handgun", "Canine_Bite", "Less_Lethal_Bean_Bag", "Physical_Take_Down",
+                  "Less_Lethal_CS_OC", "Physical_Kick", "Less_Lethal_CS_Fogger", "Physical_Leg_Sweep",
+                  "Physical_Fist_Strike", "Less_Lethal_Taser", "Physical_Knee_Strike", "Physical_Elbow_Strike", 
+                  "Physical_Palm_Strike", "Less_Lethal_Clearout_OC", "Lethal_Rifle", "Less_Lethal_Baton", 
+                  "Less_Lethal_BPS_Gas", "Less_Lethal_Burning_CS", "Lethal_Shotgun", "Less_Lethal_CS_Grenade")
+
+ind_dat_2020 <- ind_dat_2020 %>% 
+  mutate(serious = as.integer(UOF_FORCE_TYPE %in% serious_cats))
+```
