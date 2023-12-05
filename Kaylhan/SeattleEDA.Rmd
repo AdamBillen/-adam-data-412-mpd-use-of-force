@@ -204,4 +204,4 @@ ggplot(seattle, aes(x = Beat, fill = Subject_Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-E2 significantly has a higher number of incidents occuring
+E2 significantly has a higher number of incidents occurring

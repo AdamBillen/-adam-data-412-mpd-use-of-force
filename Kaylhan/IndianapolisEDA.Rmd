@@ -1,0 +1,40 @@
+---
+title: "IndianapolisEDA"
+author: "Kaylhan Garcia"
+date: "2023-12-05"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Indianapolis, Indiana Exploratory Data Analysis
+
+```{r}
+library(tidyverse)
+library(conflicted)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+library(tibble)
+```
+
+```{r}
+setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
+list.files()
+```
+
+```{r}
+library(readr)
+indiana <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_Indianapolis.csv")
+head(indiana)
+```
+
+```{r}
+indiana$Occured_date_time <- as.POSIXct(indiana$OCCURRED_DT, format="%m/%d/%Y")
+
+indiana_2020 <- indiana[format(indiana$OCCURRED_DT, "%Y") == "2020", ]
+
+view(indiana_2020)
+```
