@@ -12,15 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(nnet)
 library(MASS)
+library(rpart)
 ```
-
-
-```{r}
-mpd_dat <- read.csv('../data/UoF_mpd_2021_public.csv')
-sea_dat <- read.csv('../data/Use_Of_Force_Seattle.csv')
-chi_data <- read.csv('../data/UofF_external_2020_public_214.csv')
-```
-
 MPD regression
 
 For this study, we will conduct four multiple regressions predicting the
@@ -39,20 +32,31 @@ in cases involving humans.\
 
 
 ```{r}
+mpd_dat <- read.csv('../data/UOF_DC_2021.csv')
+sea_dat <- read.csv('../data/UOF_Seattle.csv')
+```
+
+
+
+```{r}
+mpd_dat <- read.csv('../data/UOF_DC_2021.csv')
+
+
 age_breaks <- c(18, 25, 35, 45, 55, 65)
 
 mpd_dat <- mpd_dat %>%
   mutate(
     subject_age = as.numeric(subject_age),
-    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18-24", "25-34", "35-44", "45-54", "55-65"), include.lowest = TRUE, right = FALSE))
-
-encoded_data <- model.matrix(~ . - 1, data = mpd_dat, exclude = c("IS_ID", "IncidentDate", "IncidentTime", "CaseStatus", "DateClosed", "disposition", 
-                                                                  "Officer_id", "DateClosed", "CD", "animal", "department_action", "serious"))
+    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65"), include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(uof_type, IncidentDistrict, OfficerGender, OfficerRace, AgeBands, subject_race, subject_gender) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, "/", "_")) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, "/", "_"))
 
 encoded_data <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender - 1, data = mpd_dat)
 
-your_data_encoded <- cbind(mpd_dat, encoded_data)
-
+mpd_dat_enc <- cbind(mpd_dat, encoded_data)
 
 ForceType <- as_factor(mpd_dat$uof_type)
 IncidentDistrict <- as_factor(mpd_dat$IncidentDistrict)
@@ -62,11 +66,14 @@ SubjectAge <- as_factor(mpd_dat$AgeBands)
 SubjectRace <- as_factor(mpd_dat$subject_race)
 SubjectGender <- as_factor(mpd_dat$subject_gender)
 
-model <- polr(ForceType ~ IncidentDistrict + OfficerGender + ForceType + OfficerRace + SubjectAge + SubjectRace + SubjectGender, data = mpd_dat)
+model <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderMale + OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + subject_raceBlack_African_American,
+               data = mpd_dat_enc)
 ```
 
 ```{r}
-ggplot()
+mpd_dat %>%
+  filter(uof_type=="All Firearm Discharges, No Range, Training, Animals") %>%
+  nrow()
 ```
 
 
