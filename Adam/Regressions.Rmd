@@ -32,48 +32,67 @@ in cases involving humans.\
 
 
 ```{r}
-mpd_dat <- read.csv('../data/UOF_DC_2021.csv')
+mpd_dat_2021 <- read.csv('../data/UOF_DC_2021.csv')
+mpd_dat_2020 <- read.csv('../data/UOF_DC_2020.csv')
 sea_dat <- read.csv('../data/UOF_Seattle.csv')
 ```
 
 
 
 ```{r}
-mpd_dat <- read.csv('../data/UOF_DC_2021.csv')
+age_breaks <- c(18, 25, 35, 45, 55, 65, 100)
 
-
-age_breaks <- c(18, 25, 35, 45, 55, 65)
-
-mpd_dat <- mpd_dat %>%
+mpd_dat_2021 <- mpd_dat_2021 %>%
   mutate(
     subject_age = as.numeric(subject_age),
-    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65"), include.lowest = TRUE, right = FALSE)) %>%
+    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"), include.lowest = TRUE, right = FALSE)) %>%
   drop_na(uof_type, IncidentDistrict, OfficerGender, OfficerRace, AgeBands, subject_race, subject_gender) %>%
   mutate(OfficerRace = str_replace_all(OfficerRace, "/", "_")) %>%
   mutate(OfficerRace = str_replace_all(OfficerRace, " ", "_")) %>%
   mutate(subject_race = str_replace_all(subject_race, " ", "_")) %>%
   mutate(subject_race = str_replace_all(subject_race, "/", "_"))
 
-encoded_data <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender - 1, data = mpd_dat)
+encoded_data <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender, data = mpd_dat_2021)
 
-mpd_dat_enc <- cbind(mpd_dat, encoded_data)
+mpd_dat_enc <- cbind(mpd_dat_2021, encoded_data)
 
-ForceType <- as_factor(mpd_dat$uof_type)
-IncidentDistrict <- as_factor(mpd_dat$IncidentDistrict)
-OfficerGender <- as_factor(mpd_dat$OfficerGender)
-OfficerRace <- as_factor(mpd_dat$OfficerRace)
-SubjectAge <- as_factor(mpd_dat$AgeBands)
-SubjectRace <- as_factor(mpd_dat$subject_race)
-SubjectGender <- as_factor(mpd_dat$subject_gender)
-
-model <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderMale + OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + subject_raceBlack_African_American,
+model_seattle_2021 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderMale + OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_raceOther + subject_raceWhite_Caucasian + subject_genderMale,
                data = mpd_dat_enc)
-```
 
+summary(model_seattle_2021)
+```
 ```{r}
-mpd_dat %>%
-  filter(uof_type=="All Firearm Discharges, No Range, Training, Animals") %>%
-  nrow()
-```
+mpd_dat_2020 <- mpd_dat_2020 %>%
+  mutate(
+    subject_age = as.numeric(subject_age),
+    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"), include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(uof_type, IncidentDistrict, OfficerGender, OfficerRace, AgeBands, subject_race, subject_gender) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, "/", "_")) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, "/", "_"))
 
+encoded_data_2020 <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender, data = mpd_dat_2020)
+
+mpd_dat_enc_2020 <- cbind(mpd_dat_2020, encoded_data)
+
+model_seattle_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderMale + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_raceWhite_Caucasian + subject_genderMale,
+               data = mpd_dat_enc_2020)
+
+summary(model_seattle_2020)
+```
+Seattle
+```{r}
+sea_dat <- read.csv('../data/UOF_Seattle.csv')
+
+sea_dat <- sea_dat %>%
+  mutate(datetime = mdy_hms(Occured_date_time)) %>%
+  filter(year(datetime) == 2020) %>%
+  drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
+  mutate(Incident_Type = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1))
+
+encoded_data_2020 <- model.matrix(~ Incident_Type + Subject_Race + Subject_Gender + Precinct + Sector + Beat, data = mpd_dat_2020)
+
+
+```
 
