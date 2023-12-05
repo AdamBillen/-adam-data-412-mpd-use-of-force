@@ -72,11 +72,24 @@ mpd_dat_2020 <- mpd_dat_2020 %>%
   mutate(subject_race = str_replace_all(subject_race, " ", "_")) %>%
   mutate(subject_race = str_replace_all(subject_race, "/", "_"))
 
-encoded_data_2020 <- model.matrix(~ uof_type + IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender, data = mpd_dat_2020)
+mpd_dat_2020$IncidentDistrict <- factor(mpd_dat_2020$IncidentDistrict)
+mpd_dat_2020$IncidentDistrict <- relevel(mpd_dat_2020$IncidentDistrict, ref = "1D")
+mpd_dat_2020$OfficerGender <- factor(mpd_dat_2020$OfficerGender)
+mpd_dat_2020$OfficerGender <- relevel(mpd_dat_2020$OfficerGender, ref = "Male")
+mpd_dat_2020$OfficerRace <- factor(mpd_dat_2020$OfficerRace)
+mpd_dat_2020$OfficerRace <- relevel(mpd_dat_2020$OfficerRace, ref = "White_Caucasian")
+mpd_dat_2020$AgeBands <- factor(mpd_dat_2020$AgeBands)
+mpd_dat_2020$AgeBands <- relevel(mpd_dat_2020$AgeBands, ref = "18_24")
+mpd_dat_2020$subject_race <- factor(mpd_dat_2020$subject_race)
+mpd_dat_2020$subject_race <- relevel(mpd_dat_2020$subject_race, ref = "White_Caucasian")
+mpd_dat_2020$subject_gender <- factor(mpd_dat_2020$subject_gender)
+mpd_dat_2020$subject_gender <- relevel(mpd_dat_2020$subject_gender, ref = "Male")
+
+encoded_data_2020 <- model.matrix(~ IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender, data = mpd_dat_2020)
 
 mpd_dat_enc_2020 <- cbind(mpd_dat_2020, encoded_data)
 
-model_seattle_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderMale + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_raceWhite_Caucasian + subject_genderMale,
+model_seattle_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale  + OfficerRaceBlack_African_American + OfficerRaceAsian + OfficerRaceHispanic + OfficerRaceOther + OfficerRaceWhite_Caucasian + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_raceWhite_Caucasian + subject_genderMale,
                data = mpd_dat_enc_2020)
 
 summary(model_seattle_2020)
@@ -143,6 +156,7 @@ ind_dat_2020 <- ind_dat %>%
   mutate_all(~str_replace_all(., "\\(|\\)", "")) %>%
   mutate_all(~str_replace_all(., ":", "_")) %>%
   mutate_all(~str_replace_all(., "__", "_")) %>%
+  mutate(DISTRICT = UDTEXT24B) %>%
   mutate(datetime = ymd(OCCURRED_DT)) %>%
   filter(year(datetime) == 2020) %>%
    mutate(OFF_AGE = as.numeric(OFF_AGE),
@@ -150,7 +164,8 @@ ind_dat_2020 <- ind_dat %>%
                    include.lowest = TRUE, right = FALSE)) %>%
   mutate(CIT_AGE = as.numeric(CIT_AGE),
     CIT_AGE_BANDS = cut(CIT_AGE, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
-                   include.lowest = TRUE, right = FALSE))
+                   include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(RACE, SEX, OFF_RACE, OFF_SEX, OFF_AGE, OFF_AGE_BANDS, CIT_AGE_BANDS, UOF_FORCE_TYPE)
 
 serious_cats <- c("Less_Lethal_Pepperball", "Lethal_Handgun", "Canine_Bite", "Less_Lethal_Bean_Bag", "Physical_Take_Down",
                   "Less_Lethal_CS_OC", "Physical_Kick", "Less_Lethal_CS_Fogger", "Physical_Leg_Sweep",
@@ -160,4 +175,25 @@ serious_cats <- c("Less_Lethal_Pepperball", "Lethal_Handgun", "Canine_Bite", "Le
 
 ind_dat_2020 <- ind_dat_2020 %>% 
   mutate(serious = as.integer(UOF_FORCE_TYPE %in% serious_cats))
+
+ind_dat_2020$RACE <- factor(ind_dat_2020$RACE)
+ind_dat_2020$RACE <- relevel(ind_dat_2020$RACE, ref = "White")
+ind_dat_2020$SEX <- factor(ind_dat_2020$SEX)
+ind_dat_2020$SEX <- relevel(ind_dat_2020$SEX, ref = "Male")
+ind_dat_2020$OFF_RACE <- factor(ind_dat_2020$OFF_RACE)
+ind_dat_2020$OFF_RACE <- relevel(ind_dat_2020$OFF_RACE, ref = "White")
+ind_dat_2020$OFF_SEX <- factor(ind_dat_2020$OFF_SEX)
+ind_dat_2020$OFF_SEX <- relevel(ind_dat_2020$OFF_SEX, ref = "Male")
+ind_dat_2020$OFF_AGE_BANDS <- factor(ind_dat_2020$OFF_AGE_BANDS)
+ind_dat_2020$OFF_AGE_BANDS <- relevel(ind_dat_2020$OFF_AGE_BANDS, ref = "18_24")
+ind_dat_2020$CIT_AGE_BANDS <- factor(ind_dat_2020$CIT_AGE_BANDS)
+ind_dat_2020$CIT_AGE_BANDS <- relevel(ind_dat_2020$CIT_AGE_BANDS, ref = "18_24")
+
+encoded_ind_2020 <- model.matrix(~ RACE + SEX + OFF_RACE + OFF_SEX + OFF_AGE_BANDS + CIT_AGE_BANDS, data = ind_dat_2020)
+
+ind_dat_2020_final <- cbind(ind_dat_2020, encoded_ind_2020)
+
+model_indianapolis_2020 <- glm(serious ~ RACEAsian + RACEBi_racial + RACEBlack + RACEHispanic + RACENative_Amer + RACEOther + RACEUnknown + SEXFemale + OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEAsian + OFF_RACEOther + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65 + CIT_AGE_BANDS66_100, data = ind_dat_2020_final)
+
+summary(model_indianapolis_2020)
 ```
