@@ -83,16 +83,52 @@ summary(model_seattle_2020)
 ```
 Seattle
 ```{r}
-sea_dat <- read.csv('../data/UOF_Seattle.csv')
+sea_dat_2020 <- read.csv('../data/UOF_Seattle.csv')
 
-sea_dat <- sea_dat %>%
+sea_dat_2020 <- sea_dat_2020 %>%
   mutate(datetime = mdy_hms(Occured_date_time)) %>%
   filter(year(datetime) == 2020) %>%
   drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
-  mutate(Incident_Type = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1))
+  mutate(serious = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1)) %>%
+  mutate(Subject_Race = str_replace_all(Subject_Race, "/", "_")) %>%
+  mutate(Subject_Race = str_replace_all(Subject_Race, " ", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, " ", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, "/", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, "-", "_"))
 
-encoded_data_2020 <- model.matrix(~ Incident_Type + Subject_Race + Subject_Gender + Precinct + Sector + Beat, data = mpd_dat_2020)
+encoded_seattle_2020 <- model.matrix(~ Subject_Race + Subject_Gender + Precinct + Sector + Beat, data = sea_dat_2020)
 
+sea_dat_2020_final <- cbind(sea_dat_2020, encoded_seattle_2020)
 
+model_seattle_2020 <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races + Subject_RaceWhite + Subject_GenderFemale + Subject_GenderMale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown + Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest + PrecinctWest, data = sea_dat_2020_final)
+
+summary(model_seattle_2020)
+```
+Portland
+```{r}
+pdx_dat <- read_csv("../data/UOF_Portland.csv")
+
+pdx_dat_2020 <- pdx_dat %>%
+  filter(Year == 2020) %>%
+  mutate_all(~str_replace_all(., "/", "_")) %>%
+  mutate_all(~str_replace_all(., " ", "_")) %>%
+  mutate_all(~str_replace_all(., "-", "_")) %>%
+  mutate_all(~str_replace_all(., "\\(|\\)", "")) %>%
+  rename_all(~str_replace_all(., " ", "_")) %>%
+  rename_all(~str_replace_all(., "-", "")) %>%
+  rename_all(~str_replace_all(., "/", "_")) %>%
+  mutate(Subject_Age = as.numeric(Subject_Age),
+    AgeBands = cut(Subject_Age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(Category_of_Force_Event__Measured_at_Event_Level, Officer_Precinct, Subject__Race, Subject__Sex, Subject__Transient, Subject_Age) %>%
+  mutate(serious = ifelse(Category_of_Force_Event__Measured_at_Event_Level == "IV", 0, 1))
+
+encoded_pdx_2020 <- model.matrix(~ Officer_Precinct + Subject__Race + Subject__Sex + Subject__Transient + Subject_Age, data = pdx_dat_2020)
+
+pdx_dat_2020_final <- cbind(pdx_dat_2020, encoded_pdx_2020)
+
+model_portland_2020 <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only + Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown + Subject__RaceWhite + Subject__SexMale + Subject__TransientUnknown + Subject__TransientYes + Subject_Age, data = pdx_dat_2020_final)
+
+summary(model_portland_2020)
 ```
 
