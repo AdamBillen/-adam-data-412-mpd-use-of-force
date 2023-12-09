@@ -1,5 +1,5 @@
 ---
-title: "MPD Final Project Proposal"
+title: "Use of Force Final Project Report"
 author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
 date: "2023-10-17"
 output:
@@ -17,7 +17,7 @@ dplyr::filter
 conflicts_prefer(dplyr::filter)
 ```
 
-# MPD Use of Force Final Project Proposal
+# Use of Force Final Project Report
 
 **Introduction:**
 
@@ -197,13 +197,16 @@ library(tidyverse)
 library(ggthemes)
 library(ggplot2)
 library(tibble)
+
+setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
+list.files()
 # https://mpdc.dc.gov/node/1635896
-df <- read.csv("UoF_mpd_2021_public.csv")
+df <- read.csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_DC_2020maybe.csv")
 #df
 ```
 
 ```{r}
-mpd_dat <- read.csv('UoF_mpd_2021_public.csv')
+mpd_dat <- df
 #head(mpd_dat)
 #View(mpd_dat)
 

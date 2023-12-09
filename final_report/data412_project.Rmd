@@ -1,0 +1,142 @@
+---
+title: "Use of Force Final Report"
+author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
+date: "2023-12-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Use of Force Final Report DATA 412/612
+
+Lit review
+
+## Exploratory Data Analysis
+
+```{r}
+library(tidyverse)
+library(conflicted)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+library(tibble)
+```
+
+```{r}
+setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
+list.files()
+
+```
+
+### Washington, DC
+
+#### 1. Distribution of Incident Counts by Subject Race
+
+Black/ African American have a significantly higher amount of incident counts in 2020.
+
+Conversely, Asian/Pacific Islander individuals appear to experience the least instances of use of force.
+
+```{r}
+df <- read.csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_DC_2020.csv")
+mpd_dat <- df
+ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
+  geom_bar()
+```
+
+#### 2. UOF Incident Counts by District and Subject Race
+
+Across all districts in DC, it is prevalent that Black/African Americans experience UOF at a higher rate than their counterparts.
+
+7th District has the highest total UOF incidents out of all the DC districts.
+
+```{r}
+force_by_district_race <- mpd_dat %>%
+group_by(OfficerAssignment, subject_race) %>% summarize(Total_Use_of_Force = n()) #total num of cases of use of force
+
+ggplot(subset(force_by_district_race, OfficerAssignment %in% c("1D", "2D", "3D", "4D", "5D", "6D", "7D")), 
+       aes(x = OfficerAssignment, y = Total_Use_of_Force, fill = subject_race)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Use of Force Incidents by District") +
+  xlab("Districts") +
+  ylab("Total Use of Force Incidents")
+```
+
+#### 3. Use of Force by District.
+
+1D, 2D, and 3D are posed to be the safest districts in DC, whereas 7D is deemed to be the most dangerous.
+
+```{r}
+districts <- c("1D", "2D", "3D", "4D", "5D", "6D", "7D")
+mpd_dat_filtered <- mpd_dat[mpd_dat$OfficerAssignment %in% districts, ]
+
+uof_counts <- mpd_dat_filtered %>%
+  group_by(OfficerAssignment) %>%
+  summarise(Count = n())
+
+ggplot(uof_counts, aes(x = OfficerAssignment, y = Count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Use of Force by District",
+       x = "District",
+       y = "Count")
+```
+
+### Seattle, Washington
+
+```{r include=FALSE}
+library(readr)
+seattle_2020 <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_Seattle.csv")
+
+seattle_2020 <- seattle_2020 %>%
+  mutate(datetime = mdy_hms(Occured_date_time)) %>%
+  filter(year(datetime) == 2020) %>%
+  drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
+  mutate(serious = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1))
+```
+
+#### 4. Distribution of Incident Types by Subject Race
+
+There is a huge amount of \'Not Specified\' values for this data visualization during the year 2020.
+
+White people have a shared count amount of serious incidents regarding use of force my the police department.
+
+The next following group that stands out is \'Black or African American,\' with level 1 - Use of Force being greater than the other levels.
+
+```{r}
+ggplot(seattle_2020, aes(x = Subject_Race, fill = factor(serious))) +
+  geom_bar(position = "stack") +
+  labs(
+    title = "Distribution of Incident Types by Subject Race",
+    x = "Subject Race",
+    y = "Count",
+    fill = "Incident Type"
+  ) +
+  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
+```
+
+#### 5. Comparative Analysis: Incidents in E2 by Subject Race
+
+E2 has the highest amount of incidents across all the other beats in Seattle. There are a total of 52 beats reported in the dataset.
+
+Many of the \'Subject Race\' is left unreported or \'Not Specified\' in the year 2020. The next leading race that are subjected to incidents in the E2 beat are White, then it is Black or African American.
+
+It is notable to mention that many of the serious incidents are reported as \'Not Specified\' in the E2 beat.
+
+```{r}
+e2_data <- subset(seattle_2020, Beat == "E2")
+
+ggplot(e2_data, aes(x = Subject_Race, fill = factor(serious))) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(
+    title = "Distribution of Incidents in E2 Beat",
+    x = "Subject Race",
+    y = "Count",
+    fill = "Serious Incident"
+  ) +
+  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
+```
+
+### Indianapolis, Indiana
+
+### Portland, Oregon
