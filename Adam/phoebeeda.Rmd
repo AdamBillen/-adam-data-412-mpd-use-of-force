@@ -1,0 +1,121 @@
+---
+title: "UOF Indiannapolis"
+author: "Phoebe Lin"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+
+```
+
+### Indianapolis, Indiana
+
+In Indianapolis, 52.7% of the population are Whites, 28.5% are Black or African American and 3.82% are Asian. The presence of an 'Unknown' category for subject race suggests that data collection may not be complete or consistently conducted across all incidents. But overall, the "Black" category shows significantly higher number of incidents comparedito other races.
+
+The seriousness of the cases seems to vary across races, but for those races with a significant number of incidents (Black and White categories), non-serious incidents outnumber serious incidents. This could indicate that while the use of force is more commonly reported as non-serious, serious use of force incidents still occur with notable frequency in these populations.
+
+```{r}
+ind_dat <- read_csv("../data/ind_dat_2020_final.csv")
+
+ind_dat$serious <- factor(ind_dat$serious)
+```
+
+
+#### Counts of incidents by subject race
+
+```{r}
+ggplot(data = ind_dat, mapping = aes(x = RACE)) +
+  geom_bar() +
+  labs(title = "Counts of incidents by subject race",
+       x = "Subject Race",
+       y = "Counts")
+```
+Based on the plot, the Blacks are experiencing the most UOF where over 10,000 incidents happened and followed by the White with counts less than 6,000. 
+
+
+#### The Distribution of the officer race use of force frequency.
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = OFF_RACE, fill = RACE)) +
+  geom_bar() +
+  labs(title = "Distribution of the officer race use of force frequency",
+       x = "Office Race",
+       y = "Counts")
+
+```
+In this case, the White officers are using the most use of force in an incident with highest number of Black being targeted. 
+
+#### The counts of serious incidents relative to subject race. 
+
+```{r}
+ggplot(data = ind_dat, mapping = aes(x = RACE, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+Based on the plot, Black experiencing use of force occurred the most, over 10,000 counts. White experiencing almost less than half of the incidents of the Blacks. 
+
+#### The counts of officer gender use of force frequency in relation to the subject race.
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = SEX, fill = RACE)) +
+ geom_bar() +
+ labs(title = "Distribution of officer gender UOF frequency", x = "Officer gender", y = "Count")
+
+
+```
+This plots shows the distribution of the counts of the use of force cases among male and female officers. From the chart, it appears that there are significantly more incidents involving males officer than females officer.
+
+### Portland
+
+Portland's population is made up of 635,067 of people where 73.8% are White, 5.6% are Black or African American, 8.5% are Asian. Overall, the Whites are experiencing the highest number of incidents in Portland 2020.  
+
+
+```{r}
+
+port_dat <- read_csv("../csv_data/pdx_dat_2020_final.csv")
+
+```
+
+#### Histogram of Subject Races and serious incidents
+
+```{r}
+
+port_dat$serious <- factor(port_dat$serious)
+
+ggplot(data = port_dat, mapping = aes(x = Subject__Race, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+
+Based on the plot, the race with the highest number of incidents is White, with a notable number of both serious and not serious incidents. This might due to the reason that Portland's population have over 70% Whites with only 5.6% of Blacks or African American. For all races, there are more incidents that are not serious (0) than serious (1), as indicated by the size of the colored sections.
+
+
+### Washington D.C.
+
+```{r}
+mpd_dat <- read_csv("../csv_data/mpd_dat_enc_2020.csv")
+```
+
+#### 4. Serious numbers of incidents counts based on the subject race.
+```{r}
+mpd_dat$serious <- factor(mpd_dat$serious)
+
+ggplot(data = mpd_dat, mapping = aes(x = subject_race, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+```
+
+In Washington D.C., there's nearly no serious incidents happened, less than 100 cases. However, the Black are still experiencing the most UOF overall. 
