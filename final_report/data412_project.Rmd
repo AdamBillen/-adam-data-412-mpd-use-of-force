@@ -8,8 +8,6 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-
 ---
 title: "Use of Force Final Project Report"
 author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
@@ -25,6 +23,11 @@ editor_options:
 ```{r setup, include=FALSE}
 library(conflicted)
 library(dplyr)
+library(tidyverse)
+library(nnet)
+library(MASS)
+library(rpart)
+library(coefplot)
 dplyr::filter
 conflicts_prefer(dplyr::filter)
 ```
@@ -91,11 +94,26 @@ report analyzing the past year's use of force data. While these reports tend to
 draw lots of public attention in the news, they are are generally relatively 
 surface level. They tend to include general information about the number of uses
 of force and any clear disparities in the use of force. They do not, however, 
-include more advanced methods such as regressions or hypotheses tests. 
+include more advanced methods such as regression. To expand on this existing
+literature, we will emplore more advances methods such as logistic multiple
+regression to explore the relationship between demographic factors such as subject
+or officer race and the severity of a given use of force. 
 
-To expand on the existing literature, we will use logistic multiple regression
-models to explore the relationship between demographic factors such as subject
-or officer race and the severity of a given use of force. By including all of
+**Hypotheses:**
+
+We hypothesize that Black/African American subjects are more likely to have
+serious force used against them than other racial groups, particularly
+white subjects. While this is our primary topic of interest, we expect that
+other demographic groups for both subjects and officers will have varying
+degrees of likelihood to have serious force used against them as well. We will also
+explore whether particular races of officers are more or less likely to use
+serious force against particular races of subjects. We hypthesize that white officers
+will be more likely to use serious force against black subjects than black
+officers.\
+
+**Methods:**
+
+By including all of
 the demographic information provided, we will build a clearer picture of
 exactly what demographic groups are more likely to have severe uses of force
 inflicted upon them. By subsetting our data to specific officer races, we will
@@ -129,107 +147,11 @@ tier four non-serious. The data for Indianapolis breaks down uses of force by
 individual type, which we have categorized as serious or non-serious to 
 match the other cities. Still, these categories should not be read as precisely
 comparable. Systems of reporting and publishing data vary between cities, but
-this variable still provides a stronger point of reference between cities.
+this variable still provides a stronger point of reference between cities.\
+
+**Data Exploration**
 
 
-
-In DC, specifically, previous research has
-used this research to establish that the majority of citizen-police
-interactions involve Black residents and that these individuals were much
-more likely to be stopped and frisked than white residents (Golash-Boza,
-T. Et al, 2022).
-
-This study focuses on data tracking the use of force in 2021 by the
-Metropolitan Police Department (MPD) in Washington, DC. MPD is unique in
-a number of ways. 51% of its officers were Black and 34% white in 2021
-compared to the 46.2% of residents who are white and 45% who are Black.
-This makes it one of the few police forces in the US where white
-officers are not over represented as compared to the community. This is
-commonly thought of as a positive for police forces, and studies have
-found that when police diversity matches a neighborhood, crime rates
-tend to be lower.
-
-This data includes incidents that occurred between January 1, 2021 and
-December 31, 2021. The use of force being defined as any form of
-physical effort employed to compel, sway, or convince an individual to
-adhere to an officer's directive from the MPD. The reportable forces and
-incidents include "Any use of force resulting in injury or a complaint
-of injury or pain where the injury or pain is directly associated with a
-member's use of force" and "The drawing and pointing of a firearm at, or
-in the direction of, another person when no other force was used"
-(Metropolitan Department, 2022). The dataset contains 2135 rows and 19
-variables, 14 of which are categorical variables and 5 of the others are
-quantitative. Variables include "IncidentDate", "IncidentTime",
-"IncidentDistrict", CaseStatus", "DateClose", "uof_type", "disposition",
-"department_action", "officer_id", "OfficerAssignment" ,
-"OfficerGender", "OfficerRace", "year_force", "subject_age",
-"subject_race", "subject_gender", "serious", and "CD"(Appendix A). The
-dataset is largely complete, with only a few cases of missing data. This
-data, extracted from authoritative sources, is a rich resource for
-exploring the patterns, implications, and disparities in how force is
-applied in the nation's capital.\
-
-In our case, we will be considering the variables  "IncidentDistrict,"
-"uof_type," "IncidentDate," "Disposition," "department_action,"
-"OfficerGender," "OfficerRace," "subject_age," "subject_race,"
-"subject_gender," "serious," and "CD(civil disturbance)." The rest of
-the variables (case status, when a case closed, the anonymized officer
-IDs, and officer assignment) are either irrelevant or would taint our
-data with misleading numbers, such as the anonymized officer IDs.\
-
-**Hypotheses:**
-
-We hypothesize that Black people/African Americans are overrepresented
-in use of force cases in Washington, DC. They represented 45% of the DC
-population in 2021, so if \> 45% of the subjects of uses of force in our
-data are Black/African American, they would be over represented. We also
-hypothesize that white police officers are over represented in use of
-force cases in Washington, DC. As of 2021, 34.55% of officers were
-white. If the % of white officers in use of force cases \> 34.55%, this
-would indicate over-representation. This question could serve as a case
-study for how accurate representation of a policed community affects the
-policing itself.
-
-We are particularly interested in predicting the "disposition," or how
-the department classified a use of force, based on the variables
-available to us. We hypothesize that uses of force labeled unjustified
-may be more common in wards like 7 and 8 that are more diverse and
-poorer. The location variable which is available, "IncidentDistrict," is
-police district rather than ward, but the police districts are roughly
-analogous to the wards:
-
--   District 1 = Ward 6
-
--   District 2 = Wards 2 & 3
-
--   District 3 = Ward 1
-
--   District 4 = Ward 4
-
--   District 5 = Ward 5
-
--   District 6 = Ward 7
-
--   District 7 = Ward 8
-
-We could do the same type of prediction but for a binary variable like
-"serious," which represents the severity of a given use of force.\
-
-**Methods:**
-
-For this study, we will conduct four multiple regressions predicting the
-use of force in Washington, DC by the Metropolitan Police Department.
-Our predictors will be the police district in which the use of force
-took place, the date of the incident, the gender and race of the officer
-and the age, race, and gender of the subject. The targets will be the
-type of use of force, the disposition, the department action, and the
-severity of the force. We won't include the other potential targets as
-predictors for one another because severity, for example, will likely be
-a very high predictor of the type of use of force, muddling our models.
-We will not include variables such as case status, when a case closed,
-the anonymized officer IDs, or officer assignments as predictors. We
-will remove all uses of force against animals, as we are only interested
-in cases involving humans.\
 
 **Data driven hypotheses:**
 
@@ -251,6 +173,10 @@ cases in various districts. We also expect officer race to be
 predictive, but to a lesser extent than subject race. We are especially
 interested in this variable, given DC's unique positionality as a
 majority Black police force.\
+
+**Results**
+
+
 
 **Discussion:**
 

@@ -15,21 +15,32 @@ library(tidyverse)
 library(dplyr)
 library(ggthemes)
 library(ggplot2)
-
 ```
 
 
 ```{r}
-ind_dat <- read_csv("../csv_data/ind_dat_2020_final.csv")
+ind_dat <- read_csv("../data/ind_dat_2020_final_1.csv")
 
 ind_dat$serious <- factor(ind_dat$serious)
 ```
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = OFF_RACE, fill = RACE)) +
+  geom_bar() +
+  labs(title = "Distribution of the officer race use of force frequency",
+       x = "Office Race",
+       y = "Counts")
+
+```
+In this case, the White officers are using the most use of force in an incident with highest number of Black being targeted. 
 
 ```{r}
 ggplot(data = ind_dat, mapping = aes(x = RACE, fill = serious)) +
  geom_bar() +
  labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
 ```
+Based on the plot, Black experiencing use of force occurred the most, over 10,000 counts.
 
 ```{r}
 
@@ -62,6 +73,8 @@ ggplot(data = port_dat, mapping = aes(x = Subject__Race, fill = serious)) +
 ```{r}
 mpd_dat <- read_csv("../csv_data/mpd_dat_enc_2020.csv")
 ```
+
+
 
 ```{r}
 mpd_dat$serious <- factor(mpd_dat$serious)
