@@ -67,21 +67,70 @@ uses of police violence against criminal vs non-criminal subjects (Ross et al. 2
 This existing set of literature focuses broadly on
 fatal violence inflicted by American police, often using national level
 data collected by the Washington Post (Washington Post). This data is, however,
-scattered and often non-consistent. The Washington Post's database, for example,
-relies on local news reports (Nix 2022). 
+scattered and often inconsistent. The Washington Post's database, for example,
+relies on local news reports (Nix 2022). Official national level data compiled
+by the Bureau of Justice Statistics also fails to provide a full picture. There
+is no federal regulation mandating the format or way in which individual police
+departments collect data, and so America's 18,000+ police departments each have
+control over how, when, and where data is collected. Matthew Hickman, a professor
+and former Bureau of Justicts Statistics employee, described the situation as
+a "huge mess" wherein police departments can each do "whatever they want" (Katie 
+2019). 
 
-In the past decade, the Black Lives Matter Movement rose up in this
-context and caused the public to emerge as a strong force to fight for
-racial justice and equality in the United States. This movement sparked
-a conversation around the appropriate use of force by the police. The
-public began pushing for more transparency around the use of force, and
-policing general (Schwartz, 2020). That demand has been met, to an
-extent, and today we have detailed data on the use of force by many
-police departments in the US.
+In the past decade, however, a new political force, the Black Lives Matter movement,
+rose up and sparked a conservation around the appropriate use of force by the
+police. The public began pushing for more transparency around the use of force, and
+policing generalky (Schwartz, 2020). A number of local governments have, at
+least partially, met this demand. These local governments have mandated that
+their local police forces provide public data on each case of a police officer
+using force against a civilian. The resulting datasets provide a way to analyze
+use of force more broadly, rather than soley fatal violence by the police. There
+has not, however, been a large wave of research exploring this data. Instead,
+local agencies, often Police Accountability Offices, typically produce a yearly
+report analyzing the past year's use of force data. While these reports tend to
+draw lots of public attention in the news, they are are generally relatively 
+surface level. They tend to include general information about the number of uses
+of force and any clear disparities in the use of force. They do not, however, 
+include more advanced methods such as regressions or hypotheses tests. 
 
-This creates a unique opportunity to explore 
-racialized policing not only in terms of fatal violence, but in terms of the
-use of force more broadly. 
+To expand on the existing literature, we will use logistic multiple regression
+models to explore the relationship between demographic factors such as subject
+or officer race and the severity of a given use of force. By including all of
+the demographic information provided, we will build a clearer picture of
+exactly what demographic groups are more likely to have severe uses of force
+inflicted upon them. By subsetting our data to specific officer races, we will
+examine which particular combinations of demographic factors result in more 
+severe uses of force, providing a fuller picture of how officers and citizens
+interact. We have chosen logistic multiple regression as it is the most
+applicable and interpretable model for this particular data. All of the data
+for each city is categorical, and we have thus created dummy variables for each
+key cateogrical variable in each dataset. We have chosen a regular logistic
+regression instead of an ordinal logistic regression because each categorical
+independent variable is unordered. Including categorical variables such as race
+as an ordered set of numbers would make certain races have a larger effect on
+the dependent variable, hurting the accuracy and interpretability of the
+resulting coefficients. We have created a binary dependent variable (described)
+below as our output.
+
+This study involves four unique American cities which vary widely in their
+locations and demographic makeup. We will study use of force data in Washington, 
+DC (East Coast), Indianapolis (Midwest), Portland (West Coast), and Seattle 
+(the Northwest). In order to compare these models we have created a binary
+Serious/non-Serious variable for each dataset. This variable is based on a 
+pre-existing variable in the dataset for Washington, DC. This variable, "serious,"
+is set to 1 when a use of force involves a firearm discharge, strike to the head,
+canine bite, neck restraint, results in a serious physical injury, or results in 
+the risk of or loss of consciousness, death, or serious disfigurement. The
+data for Seattle includes a similar risk tier system from one to three, which
+we have simplified to a binary variable where levels two and three are serious
+and level one is non-serious. The data for Portland utilizes a four-tiered system,
+which we have simplified to make tiers two through four serious uses of force and
+tier four non-serious. The data for Indianapolis breaks down uses of force by
+individual type, which we have categorized as serious or non-serious to 
+match the other cities. Still, these categories should not be read as precisely
+comparable. Systems of reporting and publishing data vary between cities, but
+this variable still provides a stronger point of reference between cities.
+
 
 
 In DC, specifically, previous research has
@@ -451,6 +500,8 @@ Colquhoun, Patrick. A Treatise on the Police of the Metropolis. 3rd ed., J. Mawm
 Golash-Boza, T. Et al, (2022). Broken windows and order-maintenance
 policing in gentrifying Washington, DC. Taylor & Francis Online.
 <https://doi.org/10.1080/10439463.2022.2085268>
+
+Hall, Katie. "Police Use-of-Force Data 'a Huge Mess' Across the U.S." TCA Regional News; Chicago, 8 Sep. 2019.
 
 "The Origins of Modern Day Policing." NAACP, naacp.org, https://naacp.org/find-resources/history-explained/origins-modern-day-policing. Accessed 9 Dec. 2023.
 

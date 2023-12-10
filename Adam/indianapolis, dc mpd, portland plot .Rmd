@@ -1,0 +1,74 @@
+---
+title: "UOF Indiannapolis"
+author: "Phoebe Lin"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(ggthemes)
+library(ggplot2)
+
+```
+
+
+```{r}
+ind_dat <- read_csv("../csv_data/ind_dat_2020_final.csv")
+
+ind_dat$serious <- factor(ind_dat$serious)
+```
+
+```{r}
+ggplot(data = ind_dat, mapping = aes(x = RACE, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = SEX, fill = RACE)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "District", y = "Count")
+
+
+```
+
+
+
+```{r}
+
+port_dat <- read_csv("../csv_data/pdx_dat_2020_final.csv")
+
+```
+
+```{r}
+
+port_dat$serious <- factor(port_dat$serious)
+
+ggplot(data = port_dat, mapping = aes(x = Subject__Race, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+
+
+
+```{r}
+mpd_dat <- read_csv("../csv_data/mpd_dat_enc_2020.csv")
+```
+
+```{r}
+mpd_dat$serious <- factor(mpd_dat$serious)
+
+ggplot(data = mpd_dat, mapping = aes(x = subject_race, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+```
+
