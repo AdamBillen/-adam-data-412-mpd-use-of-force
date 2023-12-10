@@ -8,27 +8,14 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
----
-title: "Use of Force Final Project Report"
-author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
-date: "2023-10-17"
-output:
-  pdf_document: default
-  word_document: default
-editor_options:
-  markdown:
-    wrap: 72
----
 
 ```{r setup, include=FALSE}
 library(conflicted)
-library(dplyr)
 library(tidyverse)
 library(nnet)
 library(MASS)
 library(rpart)
 library(coefplot)
-dplyr::filter
 conflicts_prefer(dplyr::filter)
 ```
 
@@ -151,108 +138,25 @@ this variable still provides a stronger point of reference between cities.\
 
 **Data Exploration**
 
+### Washington, DC
 
+#### 1. Distribution of Incident Counts by Subject Race
 
-**Data driven hypotheses:**
-
-Our data exploration shows us that Black/African American community
-members in DC are subject to a disproportionate amount of force, as
-compared to white community members in DC. We can also see that some
-wards see more uses of force than others, particularly wards 5, 6, and
-7. Our barplot of officer race does seem to indicate that white officers
-use force at a higher rate than Black/African American officers, but
-this will require further exploration. Our previous hypotheses remain
-relevant. We will build multivariate multiple regression models
-predicting the type of force, disposition, department action, and
-severity of a use of force with the previously discussed variables as
-predictors. Given the disproportionate representation of Black/African
-Americans in cases of use of force, we expect subject race to be highly
-predictive in the model. We also expect the police district, as a proxy
-for ward, to be highly predictive, given the disproportionate number of
-cases in various districts. We also expect officer race to be
-predictive, but to a lesser extent than subject race. We are especially
-interested in this variable, given DC's unique positionality as a
-majority Black police force.\
-
-**Results**
-
-
-
-**Discussion:**
-
-Our research fills a gap in the existing literature by exploring the use
-of force in DC specifically, rather than in the US as a whole or other
-metro areas. Other research has explored the implementation of stop and
-frisk in DC, but not the use of force broadly. The history of racialized
-policing in America is long, and its roots lay close to Washington, DC. 
-MPD is uniquely positioned as a majority Black police department in a
-demographically diverse city. By exploring how and which of its officers
-use force, on whom, and where we may build an understanding of trends in
-American policing as a whole. 
+Black/ African American have a significantly higher amount of incident counts in 2020. 
+Conversely, Asian/Pacific Islander individuals appear to experience the least instances of use of force.
 
 ```{r}
-library(conflicted)
-library(dplyr)
-library(tidyverse)
-library(ggthemes)
-library(ggplot2)
-library(tibble)
-
-setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
-list.files()
-# https://mpdc.dc.gov/node/1635896
-df <- read.csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_DC_2020maybe.csv")
-#df
-```
-
-```{r}
+df <- read.csv("../data/UOF_DC_2020.csv")
 mpd_dat <- df
-#head(mpd_dat)
-#View(mpd_dat)
-
-ggplot(data = mpd_dat, mapping = aes(x = IncidentDistrict)) + 
-  geom_bar() +
-    facet_wrap(~uof_type)
-```
-
-This boxplot provides an overview of use-of-force incidents across
-different districts, categorizing them by the specific type of force
-used. From the graph, it is evident that certain categories, namely
-"hand controls injury," "pointing of a firearm," "tactical takedown
-injury," and "Tactical Takedown: No Injury or Complaint of Pain,"
-present outstanding counts. Furthermore, districts 6D and 7D stand out
-as having the highest incidence rates, with "Tactical Takedown: No
-Injury or Complaint of Pain" almost reaching 150 counts. These findings
-suggest that these particular districts(6D and 7D) are more prone to
-experiencing use-of-force incidents.
-
-```{r}
-ggplot(data = mpd_dat, mapping = aes(x = serious)) + 
-  geom_bar() +
-    facet_wrap(~subject_race)
-```
-
-This plot shows the proportion of serious (1) to non serious (0) uses of
-force for each subject race. Serious uses of force include firearm
-discharges, uses of force resulting in a serious injury, all head
-strikes with an impact weapon, uses of force resulting in
-unconsciousness or that create a substantial risk of death or
-disfigurement, canine bites, neck restraints, or uses of force which
-resulted in death.
-
-```{r}
 ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
   geom_bar()
 ```
 
-This boxplot takes subject_race as the x-axis and calculates its count
-as the y-axis. The data presented in the plot clearly indicates that
-Black/African American individuals have experienced a significantly
-higher number of use-of-force incidents compared to the other four
-racial categories. Conversely, Asian/Pacific Islander individuals appear
-to experience the least instances of use of force. This significant
-difference between each race can lead to the assumptions that
-Black/African American are mostly being targeted by the police.
+#### 2. UOF Incident Counts by District and Subject Race
+
+Across all districts in DC, it is prevalent that Black/African Americans experience UOF at a higher rate than their counterparts.
+
+7th District has the highest total UOF incidents out of all the DC districts.
 
 ```{r}
 force_by_district_race <- mpd_dat %>%
@@ -266,112 +170,11 @@ ggplot(subset(force_by_district_race, OfficerAssignment %in% c("1D", "2D", "3D",
   ylab("Total Use of Force Incidents")
 ```
 
-```{r}
-#what dispositions are we most interested in knowing more about?
-```
+#### 3. Use of Force by District.
+
+1D, 2D, and 3D are shown  to be the safest districts in DC, whereas 7D is deemed to be the most dangerous.
 
 ```{r}
-#graph for gender and uof type 
-mpd_dat <- mpd_dat[complete.cases(mpd_dat), ] #removed nulls
-
-ggplot(mpd_dat, aes(x = subject_gender, fill = uof_type)) +
-  geom_bar() +
-  labs(title = "Gender and Use of Force Type",
-       x = "Gender",
-       y = "Count") +
-  scale_fill_discrete(name = "UOF Type")
-
-```
-
-This plot shows the number of uses of force and the subject race of
-those uses for each police district. Based on the graph, the district of
-7D occurs the most incidents of the use of force. For the overall trend,
-Black/African American still occurs as the significance in this case.
-
-```{r}
-unique(mpd_dat$disposition)
-#rename 
-#Justified - tactical improvement opp -> jtip 
-#Justified - within department policy -> jwdp
-#not justified - not within departmental policy -> njnwdp
-
-mpd_dat$disposition <- recode(mpd_dat$disposition,
-  "Justified - Tactical Improvement Opportunity" = "JTIP",
-  "Tracking Only" = "Tracking",
-  "Justified - Within Department Policy" = "JWDP",
-  "Not Justified - Not Within Departmental Policy" = "NJNWDP",
-  "NA" = "Unknown"
-)
-```
-
-```{r}
-unique(mpd_dat$disposition)
-```
-
-This plot shows the count for each gender and uses color to indicate the
-different use of force type. The count of male was significant, which
-likely suggests that men experience the use of force more than females.
-At the same time, the type of "Hand & Straight Strikes", "Other
-non-traditional weapons", and "Tactical Takedown: No Injury or Complaint
-of Pain" happened the most in the incidents of the use of force.
-
-```{r}
-unique(mpd_dat$uof_type)
-```
-
-```{r}
-unique(mpd_dat$OfficerAssignment)
-```
-
-```{r}
-districts <- c("1D", "2D", "3D", "4D", "5D", "6D", "7D")
-mpd_dat_filtered <- mpd_dat[mpd_dat$OfficerAssignment %in% districts, ]
-
-
-ggplot(mpd_dat_filtered, aes(x = disposition)) +
-  geom_bar() +
-  labs(title = "Dispositions for Each District",
-       x = "Dispositions",
-       y = "Count")
-```
-
-```{r}
-#df with officer assignment, disposition, officer race
-officer_by_district <- mpd_dat %>%
-  group_by(OfficerAssignment, disposition, OfficerRace)
-```
-
-```{r}
-summary_data <- officer_by_district %>%
-  filter(OfficerAssignment %in% c("1D")) %>%
-  group_by(OfficerAssignment, disposition) %>%
-  summarise(count = n())
-
-ggplot(summary_data, aes(x = OfficerAssignment, fill = disposition, y = count)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "District 1: Use of Force Disposition by Officers",
-       x = "District",
-       y = "Count") +
-  facet_wrap(~OfficerAssignment, ncol = 2)
-
-```
-
-```{r}
-summary_data <- officer_by_district %>%
-  filter(OfficerAssignment %in% c("7D")) %>%
-  group_by(OfficerAssignment, disposition) %>%
-  summarise(count = n())
-
-ggplot(summary_data, aes(x = OfficerAssignment, fill = disposition, y = count)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "District 7: Use of Force Disposition by Officers",
-       x = "District",
-       y = "Count") +
-  facet_wrap(~OfficerAssignment, ncol = 2)
-```
-
-```{r}
-
 districts <- c("1D", "2D", "3D", "4D", "5D", "6D", "7D")
 mpd_dat_filtered <- mpd_dat[mpd_dat$OfficerAssignment %in% districts, ]
 
@@ -386,20 +189,539 @@ ggplot(uof_counts, aes(x = OfficerAssignment, y = Count)) +
        y = "Count")
 ```
 
-```{r}
-summary_data <- officer_by_district %>%
-  filter(OfficerAssignment %in% c("1D", "2D", "3D", "4D", "5D", "6D", "7D")) %>%
-  group_by(OfficerAssignment, disposition) %>%
-  summarise(count = n())
+### Seattle, Washington
 
+```{r include=FALSE}
+seattle_2020 <- read_csv("../data/UOF_Seattle.csv")
 
-ggplot(summary_data, aes(x = OfficerAssignment, fill = disposition, y = count)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Use of Force Disposition by Officers District",
-       x = "Districts",
-       y = "Disposition") +
-  facet_wrap(~OfficerAssignment, ncol = 2)
+seattle_2020 <- seattle_2020 %>%
+  mutate(datetime = mdy_hms(Occured_date_time)) %>%
+  filter(year(datetime) == 2020) %>%
+  drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
+  mutate(serious = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1))
 ```
+
+#### 4. Distribution of Incident Types by Subject Race
+
+There is a huge amount of \'Not Specified\' values for this data visualization during the year 2020.
+
+White people have a shared count amount of serious incidents regarding use of force my the police department.
+
+The next following group that stands out is \'Black or African American,\' with level 1 - Use of Force being greater than the other levels.
+
+```{r}
+ggplot(seattle_2020, aes(x = Subject_Race, fill = factor(serious))) +
+  geom_bar(position = "stack") +
+  labs(
+    title = "Distribution of Incident Types by Subject Race",
+    x = "Subject Race",
+    y = "Count",
+    fill = "Incident Type"
+  ) +
+  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
+```
+
+#### 5. Comparative Analysis: Incidents in E2 by Subject Race
+
+E2 has the highest amount of incidents across all the other beats in Seattle. There are a total of 52 beats reported in the dataset.
+
+Many of the \'Subject Race\' is left unreported or \'Not Specified\' in the year 2020. The next leading race that are subjected to incidents in the E2 beat are White, then it is Black or African American.
+
+It is notable to mention that many of the serious incidents are reported as \'Not Specified\' in the E2 beat.
+
+```{r}
+e2_data <- subset(seattle_2020, Beat == "E2")
+
+ggplot(e2_data, aes(x = Subject_Race, fill = factor(serious))) +
+  geom_bar(position = "dodge", stat = "count") +
+  labs(
+    title = "Distribution of Incidents in E2 Beat",
+    x = "Subject Race",
+    y = "Count",
+    fill = "Serious Incident"
+  ) +
+  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
+```
+
+### Indianapolis, Indiana
+
+### Portland, Oregon
+
+**Data driven hypotheses:**
+
+Our data exploration shows that Black/African American community members across
+each city are subject to a disproportionate amount of serious force, as compared
+to white community members. We can also see that particular wards and districts
+in some cities see a disproprionate amount of use of force generally. Our
+previous hypotheses remain relevant. We will use the methods described above
+to further explore these relationships.  Given the disproportionate representation 
+of Black/African Americans in cases of use of force, we expect subject race 
+to be highly predictive in the model. We also expect some locations and 
+districts to be highly predictive, as well as officer race.\
+
+**Results**
+Reading in data
+```{r}
+mpd_dat_2020 <- read.csv('../data/UOF_DC_2020.csv')
+sea_dat_2020 <- read.csv('../data/UOF_Seattle.csv')
+pdx_dat_2020 <- read_csv("../data/UOF_Portland.csv")
+ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
+```
+Setting up the data for DC
+```{r, include = FALSE}
+age_breaks <- c(18, 25, 35, 45, 55, 65, 100)
+
+mpd_dat_2020 <- mpd_dat_2020 %>%
+  mutate(
+    subject_age = as.numeric(subject_age),
+    AgeBands = cut(subject_age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(uof_type, IncidentDistrict, OfficerGender, OfficerRace, AgeBands, subject_race, subject_gender) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, "/", "_")) %>%
+  mutate(OfficerRace = str_replace_all(OfficerRace, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, " ", "_")) %>%
+  mutate(subject_race = str_replace_all(subject_race, "/", "_"))
+
+mpd_dat_2020$IncidentDistrict <- factor(mpd_dat_2020$IncidentDistrict)
+mpd_dat_2020$IncidentDistrict <- relevel(mpd_dat_2020$IncidentDistrict, ref = "1D")
+mpd_dat_2020$OfficerGender <- factor(mpd_dat_2020$OfficerGender)
+mpd_dat_2020$OfficerGender <- relevel(mpd_dat_2020$OfficerGender, ref = "Male")
+mpd_dat_2020$OfficerRace <- factor(mpd_dat_2020$OfficerRace)
+mpd_dat_2020$OfficerRace <- relevel(mpd_dat_2020$OfficerRace, ref = "White_Caucasian")
+mpd_dat_2020$AgeBands <- factor(mpd_dat_2020$AgeBands)
+mpd_dat_2020$AgeBands <- relevel(mpd_dat_2020$AgeBands, ref = "18_24")
+mpd_dat_2020$subject_race <- factor(mpd_dat_2020$subject_race)
+mpd_dat_2020$subject_race <- relevel(mpd_dat_2020$subject_race, ref = "White_Caucasian")
+mpd_dat_2020$subject_gender <- factor(mpd_dat_2020$subject_gender)
+mpd_dat_2020$subject_gender <- relevel(mpd_dat_2020$subject_gender, ref = "Male")
+
+encoded_data_2020 <- model.matrix(~ IncidentDistrict + OfficerGender + OfficerRace + AgeBands + subject_race + subject_gender, data = mpd_dat_2020)
+
+mpd_dat_enc_2020 <- cbind(mpd_dat_2020, encoded_data_2020)
+```
+DC overall regression
+```{r}
+model_mpd_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_enc_2020)
+
+summary(model_mpd_2020)
+coefplot(model_mpd_2020)
+```
+DC specific officer/subject relationships
+```{r}
+mpd_dat_blackoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "Black_African_American")
+
+model_mpd_blackoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_enc_2020)
+
+summary(model_mpd_blackoff_2020)
+coefplot(model_mpd_blackoff_2020)
+
+mpd_dat_whiteoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "White_Caucasian")
+
+model_mpd_whiteoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_whiteoff)
+
+summary(model_mpd_whiteoff_2020)
+coefplot(model_mpd_whiteoff_2020)
+
+mpd_dat_hispanicoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "Hispanic")
+
+model_dat_hispanicoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_hispanicoff)
+
+summary(model_dat_hispanicoff_2020)
+coefplot(model_dat_hispanicoff_2020)
+```
+
+DC counts
+```{r}
+mpd_dat_whiteoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+matrix_data_ind <- matrix(c(
+  55, 50, 14,
+  800, 757, 181,
+  2, 2, 0,
+  17, 7, 7
+), ncol = 3, byrow = TRUE)
+
+row_names_ind <- c("White subject", "Black subject", "Hispanic subject", "Asian subject")
+col_names_ind <- c("White officer", "Black officer", "Hispanic officer")
+
+data_df_ind <- as.data.frame(matrix_data_ind)
+rownames(data_df_ind) <- row_names_ind
+colnames(data_df_ind) <- col_names_ind
+
+print(data_df_ind)
+```
+
+Seattle
+```{r}
+sea_dat_2020 <- sea_dat_2020 %>%
+  mutate(datetime = mdy_hms(Occured_date_time)) %>%
+  filter(year(datetime) == 2020) %>%
+  drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
+  mutate(serious = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1)) %>%
+  mutate(Subject_Race = str_replace_all(Subject_Race, "/", "_")) %>%
+  mutate(Subject_Race = str_replace_all(Subject_Race, " ", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, " ", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, "/", "_")) %>%
+  mutate(Subject_Gender = str_replace_all(Subject_Gender, "-", "_"))
+
+sea_dat_2020$Subject_Race <- factor(sea_dat_2020$Subject_Race)
+sea_dat_2020$Subject_Race <- relevel(sea_dat_2020$Subject_Race, ref = "White")
+sea_dat_2020$Subject_Gender <- factor(sea_dat_2020$Subject_Gender)
+sea_dat_2020$Subject_Gender <- relevel(sea_dat_2020$Subject_Gender, ref = "Male")
+sea_dat_2020$Precinct <- factor(sea_dat_2020$Precinct)
+sea_dat_2020$Precinct <- relevel(sea_dat_2020$Precinct, ref = "West")
+
+encoded_seattle_2020 <- model.matrix(~ Subject_Race + Subject_Gender + Precinct, data = sea_dat_2020)
+
+sea_dat_2020_final <- cbind(sea_dat_2020, encoded_seattle_2020)
+
+
+model_seattle_2020 <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races + Subject_GenderFemale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown + Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest, data = sea_dat_2020_final)
+
+summary(model_seattle_2020)
+coefplot(model_seattle_2020)
+
+model_seattle_subrace <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races, data = sea_dat_2020_final)
+summary(model_seattle_subrace)
+
+model_seattle_subgender <- glm(serious ~ Subject_GenderFemale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown, data = sea_dat_2020_final)
+summary(model_seattle_subgender)
+
+model_seattle_precinct <- glm(serious ~ Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest, data = sea_dat_2020_final)
+summary(model_seattle_precinct)
+```
+Portland
+```{r}
+pdx_dat_2020 <- pdx_dat_2020 %>%
+  filter(Year == 2020) %>%
+  mutate_all(~str_replace_all(., "/", "_")) %>%
+  mutate_all(~str_replace_all(., " ", "_")) %>%
+  mutate_all(~str_replace_all(., "-", "_")) %>%
+  mutate_all(~str_replace_all(., "\\(|\\)", "")) %>%
+  rename_all(~str_replace_all(., " ", "_")) %>%
+  rename_all(~str_replace_all(., "-", "")) %>%
+  rename_all(~str_replace_all(., "/", "_")) %>%
+  mutate(Subject_Age = as.numeric(Subject_Age),
+    AgeBands = cut(Subject_Age, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(Category_of_Force_Event__Measured_at_Event_Level, Officer_Precinct, Subject__Race, Subject__Sex, Subject__Transient, AgeBands) %>%
+  mutate(serious = ifelse(Category_of_Force_Event__Measured_at_Event_Level == "IV", 0, 1))
+
+pdx_dat_2020$Officer_Precinct <- factor(pdx_dat_2020$Officer_Precinct)
+pdx_dat_2020$Officer_Precinct <- relevel(pdx_dat_2020$Officer_Precinct, ref = "Central_Precinct")
+pdx_dat_2020$Subject__Race <- factor(pdx_dat_2020$Subject__Race)
+pdx_dat_2020$Subject__Race <- relevel(pdx_dat_2020$Subject__Race, ref = "White")
+pdx_dat_2020$Subject__Sex <- factor(pdx_dat_2020$Subject__Sex)
+pdx_dat_2020$Subject__Sex <- relevel(pdx_dat_2020$Subject__Sex, ref = "Male")
+pdx_dat_2020$AgeBands <- factor(pdx_dat_2020$AgeBands)
+pdx_dat_2020$AgeBands <- relevel(pdx_dat_2020$AgeBands, ref = "18_24")
+
+encoded_pdx_2020 <- model.matrix(~ Officer_Precinct + Subject__Race + Subject__Sex + Subject__Transient + AgeBands, data = pdx_dat_2020)
+
+pdx_dat_2020_final <- cbind(pdx_dat_2020, encoded_pdx_2020)
+
+model_portland_2020 <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only + Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown + Subject__SexFemale + Subject__TransientUnknown + Subject__TransientYes + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100, data = pdx_dat_2020_final)
+
+summary(model_portland_2020)
+coefplot(model_portland_2020)
+
+model_portland_precinct <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only, data = pdx_dat_2020_final)
+summary(model_portland_precinct)
+
+model_portland_race <- glm(serious ~ Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown, data = pdx_dat_2020_final)
+summary(model_portland_race)
+
+model_portland_sex <- glm(serious ~ Subject__SexFemale, data = pdx_dat_2020_final)
+summary(model_portland_sex)
+
+model_portland_transient <- glm(serious ~ Subject__TransientUnknown + Subject__TransientYes, data = pdx_dat_2020_final)
+summary(model_portland_transient)
+
+model_portland_age <- glm(serious ~ AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100, data = pdx_dat_2020_final)
+summary(model_portland_age)
+
+```
+Indianapolis
+```{r}
+ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
+
+ind_dat_2020 <- ind_dat_2020 %>%
+  mutate_all(~str_replace_all(., "/", "_")) %>%
+  mutate_all(~str_replace_all(., " ", "_")) %>%
+  mutate_all(~str_replace_all(., ",", "_")) %>%
+  mutate_all(~str_replace_all(., "-", "_")) %>%
+  mutate_all(~str_replace_all(., "\\(|\\)", "")) %>%
+  mutate_all(~str_replace_all(., ":", "_")) %>%
+  mutate_all(~str_replace_all(., "__", "_")) %>%
+  mutate(DISTRICT = UDTEXT24B) %>%
+  mutate(datetime = mdy(OCCURRED_DT)) %>%
+  filter(year(datetime) == 2020) %>%
+   mutate(OFF_AGE = as.numeric(OFF_AGE),
+    OFF_AGE_BANDS = cut(OFF_AGE, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  mutate(CIT_AGE = as.numeric(CIT_AGE),
+    CIT_AGE_BANDS = cut(CIT_AGE, breaks = age_breaks, labels = c("18_24", "25_34", "35_44", "45_54", "55_65", "66_100"),
+                   include.lowest = TRUE, right = FALSE)) %>%
+  drop_na(RACE, SEX, OFF_RACE, OFF_SEX, OFF_AGE, OFF_AGE_BANDS, CIT_AGE_BANDS, UOF_FORCE_TYPE)
+
+serious_cats <- c("Less_Lethal_Pepperball", "Lethal_Handgun", "Canine_Bite", "Less_Lethal_Bean_Bag", "Physical_Take_Down",
+                  "Less_Lethal_CS_OC", "Physical_Kick", "Less_Lethal_CS_Fogger", "Physical_Leg_Sweep",
+                  "Physical_Fist_Strike", "Less_Lethal_Taser", "Physical_Knee_Strike", "Physical_Elbow_Strike", 
+                  "Physical_Palm_Strike", "Less_Lethal_Clearout_OC", "Lethal_Rifle", "Less_Lethal_Baton", 
+                  "Less_Lethal_BPS_Gas", "Less_Lethal_Burning_CS", "Lethal_Shotgun", "Less_Lethal_CS_Grenade")
+
+ind_dat_2020 <- ind_dat_2020 %>% 
+  mutate(serious = as.integer(UOF_FORCE_TYPE %in% serious_cats))
+
+ind_dat_2020$RACE <- factor(ind_dat_2020$RACE)
+ind_dat_2020$RACE <- relevel(ind_dat_2020$RACE, ref = "White")
+ind_dat_2020$SEX <- factor(ind_dat_2020$SEX)
+ind_dat_2020$SEX <- relevel(ind_dat_2020$SEX, ref = "Male")
+ind_dat_2020$OFF_RACE <- factor(ind_dat_2020$OFF_RACE)
+ind_dat_2020$OFF_RACE <- relevel(ind_dat_2020$OFF_RACE, ref = "White")
+ind_dat_2020$OFF_SEX <- factor(ind_dat_2020$OFF_SEX)
+ind_dat_2020$OFF_SEX <- relevel(ind_dat_2020$OFF_SEX, ref = "Male")
+ind_dat_2020$OFF_AGE_BANDS <- factor(ind_dat_2020$OFF_AGE_BANDS)
+ind_dat_2020$OFF_AGE_BANDS <- relevel(ind_dat_2020$OFF_AGE_BANDS, ref = "18_24")
+ind_dat_2020$CIT_AGE_BANDS <- factor(ind_dat_2020$CIT_AGE_BANDS)
+ind_dat_2020$CIT_AGE_BANDS <- relevel(ind_dat_2020$CIT_AGE_BANDS, ref = "18_24")
+
+encoded_ind_2020 <- model.matrix(~ RACE + SEX + OFF_RACE + OFF_SEX + OFF_AGE_BANDS + CIT_AGE_BANDS, data = ind_dat_2020)
+
+ind_dat_2020_final <- cbind(ind_dat_2020, encoded_ind_2020)
+
+model_indianapolis_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_2020_final)
+
+summary(model_indianapolis_2020)
+coefplot(model_indianapolis_2020)
+
+ind_dat_blackoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "Black")
+
+model_ind_blackoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_blackoff)
+
+summary(model_ind_blackoff_2020)
+coefplot(model_ind_blackoff_2020)
+
+ind_dat_whiteoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "White")
+
+model_ind_whiteoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_whiteoff)
+
+summary(model_ind_whiteoff_2020)
+coefplot(model_ind_whiteoff_2020)
+
+ind_dat_hispanicoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "Hispanic")
+
+model_ind_hispanicoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_hispanicoff)
+
+summary(model_ind_hispanicoff_2020)
+coefplot(model_ind_hispanicoff_2020)
+
+model_indianapolis_subrace <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown, data=ind_dat_2020_final)
+summary(model_indianapolis_subrace)
+
+model_indianapolis_subsex <- glm(serious ~ SEXFemale, data=ind_dat_2020_final)
+summary(model_indianapolis_subsex)
+
+model_indianapolis_offrace <- glm(serious ~  OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther, data=ind_dat_2020_final)
+summary(model_indianapolis_offrace)
+
+model_indianapolis_offsex <- glm(serious ~ OFF_SEXFemale, data=ind_dat_2020_final)
+summary(model_indianapolis_offsex)
+
+model_indianapolis_offage <- glm(serious ~ OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100, data=ind_dat_2020_final)
+summary(model_indianapolis_offage)
+
+model_indianapolis_subage <- glm(serious ~ CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data=ind_dat_2020_final)
+summary(model_indianapolis_subage)
+```
+
+```{r}
+ind_dat_whiteoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_whiteoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_whiteoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
+
+
+ind_dat_blackoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_blackoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_blackoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
+
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
+
+
+matrix_data <- matrix(c(
+  601, 1659, 63,
+  62, 139, 3,
+  36, 100, 3
+), ncol = 3, byrow = TRUE)
+
+row_names <- c("White subject", "Black subject", "Hispanic subject")
+col_names <- c("White officer", "Black officer", "Hispanic officer")
+
+data_df <- as.data.frame(matrix_data)
+rownames(data_df) <- row_names
+colnames(data_df) <- col_names
+
+print(data_df)
+```
+```{r}
+file_path <- "../data/ind_dat_2020_final.csv"
+write.csv(ind_dat_2020_final, file = file_path, row.names = FALSE)
+
+file_path <- "../data/sea_dat_2020_final.csv"
+write.csv(sea_dat_2020_final, file = file_path, row.names = FALSE)
+
+file_path <- "../data/mpd_dat_enc_2020.csv"
+write.csv(mpd_dat_enc_2020, file = file_path, row.names = FALSE)
+
+file_path <- "../data/pdx_dat_2020_final.csv"
+write.csv(pdx_dat_2020_final, file = file_path, row.names = FALSE)
+```
+
+**Discussion:**
+
+Our research fills a gap in the existing literature by exploring the use
+of force in DC specifically, rather than in the US as a whole or other
+metro areas. Other research has explored the implementation of stop and
+frisk in DC, but not the use of force broadly. The history of racialized
+policing in America is long, and its roots lay close to Washington, DC. 
+MPD is uniquely positioned as a majority Black police department in a
+demographically diverse city. By exploring how and which of its officers
+use force, on whom, and where we may build an understanding of trends in
+American policing as a whole. 
+
+**Appendix**
+All other regression outputs, including our exploration of individual relationships,
+are included below. We did this in order to make the results section smaller
+and easier to read.
+
+Individual variable/dependent relationships for DC.
+```{r}
+model_mpd_district <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther,
+               data = mpd_dat_enc_2020)
+summary(model_mpd_district)
+
+model_mpd_offrace <- glm(serious ~ OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther, 
+                         data = mpd_dat_enc_2020)
+summary(model_mpd_offrace)
+
+model_mpd_offgender <- glm(serious ~ OfficerGenderFemale, data = mpd_dat_enc_2020)
+summary(model_mpd_offgender)
+
+model_mpd_age <- glm(serious ~ AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100,
+                     data = mpd_dat_enc_2020)
+summary(model_mpd_age)
+
+model_mpd_subrace <- glm(serious ~ subject_raceBlack_African_American + subject_raceHispanic,
+                     data = mpd_dat_enc_2020)
+summary(model_mpd_subrace)
+
+model_mpd_subgender <- glm(serious ~ subject_genderFemale,
+                     data = mpd_dat_enc_2020)
+summary(model_mpd_subgender)
+```
+
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
