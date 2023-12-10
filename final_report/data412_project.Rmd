@@ -10,7 +10,7 @@ editor_options:
     wrap: 72
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(conflicted)
 library(tidyverse)
 library(nnet)
@@ -192,7 +192,7 @@ ggplot(uof_counts, aes(x = OfficerAssignment, y = Count)) +
 
 ### Seattle, Washington
 
-```{r include=FALSE}
+```{r}
 seattle_2020 <- read_csv("../data/UOF_Seattle.csv")
 
 seattle_2020 <- seattle_2020 %>%
@@ -243,7 +243,7 @@ ggplot(e2_data, aes(x = Subject_Race, fill = factor(serious))) +
   ) +
   scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
 ```
-### Indianapolis, Indiana
+###Indianapolis, Indiana
 
 In Indianapolis, 52.7% of the population are Whites, 28.5% are Black or African American and 3.82% are Asian. The presence of an 'Unknown' category for subject race suggests that data collection may not be complete or consistently conducted across all incidents. But overall, the "Black" category shows significantly higher number of incidents comparedito other races.
 
@@ -271,13 +271,11 @@ Based on the plot, the Blacks are experiencing the most UOF where over 10,000 in
 #### The Distribution of the officer race use of force frequency.
 
 ```{r}
-
 ggplot(data = ind_dat, mapping = aes(x = OFF_RACE, fill = RACE)) +
   geom_bar() +
   labs(title = "Distribution of the officer race use of force frequency",
        x = "Office Race",
        y = "Counts")
-
 ```
 In this case, the White officers are using the most use of force in an incident with highest number of Black being targeted. 
 
@@ -293,12 +291,9 @@ Based on the plot, Black experiencing use of force occurred the most, over 10,00
 #### The counts of officer gender use of force frequency in relation to the subject race.
 
 ```{r}
-
 ggplot(data = ind_dat, mapping = aes(x = SEX, fill = RACE)) +
  geom_bar() +
  labs(title = "Distribution of officer gender UOF frequency", x = "Officer gender", y = "Count")
-
-
 ```
 This plots shows the distribution of the counts of the use of force cases among male and female officers. From the chart, it appears that there are significantly more incidents involving males officer than females officer.
 
@@ -335,16 +330,18 @@ of Black/African Americans in cases of use of force, we expect subject race
 to be highly predictive in the model. We also expect some locations and 
 districts to be highly predictive, as well as officer race.\
 
-**Results**
+**Results**/
+
+
 ### Reading in data
-```{r, include = FALSE}
+```{r}
 mpd_dat_2020 <- read.csv('../data/UOF_DC_2020.csv')
 sea_dat_2020 <- read.csv('../data/UOF_Seattle.csv')
 pdx_dat_2020 <- read_csv("../data/UOF_Portland.csv")
 ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
 ```
 ### Setting up the data for DC
-```{r, include = FALSE}
+```{r}
 age_breaks <- c(18, 25, 35, 45, 55, 65, 100)
 
 mpd_dat_2020 <- mpd_dat_2020 %>%
@@ -410,124 +407,130 @@ model_mpd_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + Incide
 summary(model_mpd_2020)
 coefplot(model_mpd_2020)
 ```
-DC specific officer/subject relationships
+#### White officers in Washington, DC
+This regression utilizes the same variables and setup as the full DC
+regression, but includes only white officers.
+
+Our results indicate that white officers in DC are no more likely to use
+serious force against one racial group than against another. The subject race 
+variables each have insignificant p values. Our results do indicate that white 
+officers in DC are 4% less likely to use force in District 5 than in District 1 
+(p = .018) force against subjects aged 55 to 65 than against those aged 18-24 (p = .047).
+
+Full results for individual officer race breakdowns for Washington, DC are 
+available under "Officer race breakdowns DC" in the appendix.
+
 ```{r}
-mpd_dat_blackoff <- mpd_dat_enc_2020 %>%
-  filter(OfficerRace == "Black_African_American")
-
-model_mpd_blackoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
-               data = mpd_dat_enc_2020)
-
-summary(model_mpd_blackoff_2020)
-coefplot(model_mpd_blackoff_2020)
-
 mpd_dat_whiteoff <- mpd_dat_enc_2020 %>%
   filter(OfficerRace == "White_Caucasian")
 
-model_mpd_whiteoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+model_mpd_whiteoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
                data = mpd_dat_whiteoff)
 
 summary(model_mpd_whiteoff_2020)
 coefplot(model_mpd_whiteoff_2020)
+```
+### Officer + subject race combination counts in DC
+Getting the counts
+```{r}
+mpd_dat_blackoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "Black_African_American")
 
 mpd_dat_hispanicoff <- mpd_dat_enc_2020 %>%
   filter(OfficerRace == "Hispanic")
 
-model_dat_hispanicoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
-               data = mpd_dat_hispanicoff)
+mpd_dat_whiteoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
 
-summary(model_dat_hispanicoff_2020)
-coefplot(model_dat_hispanicoff_2020)
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_whiteoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_blackoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
+
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "White_Caucasian") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Black_African_American") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Asian_Pacific_Islander") %>%
+  nrow()
+
+mpd_dat_hispanicoff %>%
+  filter(subject_race == "Hispanic") %>%
+  nrow()
 ```
-
-DC counts
+The below matrix shows the combination counts of officer + subject race for
+each possible combination. We analyzed this relationship by developing
+the regressions for specific officer races, as shown above in the regression
+for just white officers in DC For the full results of those 
+regressions, view "Officer race breakdowns DC" in the appendix.
 ```{r}
-mpd_dat_whiteoff %>%
-  filter(subject_race == "White_Caucasian") %>%
-  nrow()
-
-mpd_dat_whiteoff %>%
-  filter(subject_race == "Black_African_American") %>%
-  nrow()
-
-mpd_dat_whiteoff %>%
-  filter(subject_race == "Asian_Pacific_Islander") %>%
-  nrow()
-
-mpd_dat_whiteoff %>%
-  filter(subject_race == "Hispanic") %>%
-  nrow()
-
-
-mpd_dat_blackoff %>%
-  filter(subject_race == "White_Caucasian") %>%
-  nrow()
-
-mpd_dat_blackoff %>%
-  filter(subject_race == "Black_African_American") %>%
-  nrow()
-
-mpd_dat_blackoff %>%
-  filter(subject_race == "Asian_Pacific_Islander") %>%
-  nrow()
-
-mpd_dat_blackoff %>%
-  filter(subject_race == "Hispanic") %>%
-  nrow()
-
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "White_Caucasian") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Black_African_American") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Asian_Pacific_Islander") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Hispanic") %>%
-  nrow()
-
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "White_Caucasian") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Black_African_American") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Asian_Pacific_Islander") %>%
-  nrow()
-
-mpd_dat_hispanicoff %>%
-  filter(subject_race == "Hispanic") %>%
-  nrow()
-
-matrix_data_ind <- matrix(c(
+matrix_data_mpd <- matrix(c(
   55, 50, 14,
   800, 757, 181,
   2, 2, 0,
   17, 7, 7
 ), ncol = 3, byrow = TRUE)
 
-row_names_ind <- c("White subject", "Black subject", "Hispanic subject", "Asian subject")
-col_names_ind <- c("White officer", "Black officer", "Hispanic officer")
+row_names_mpd <- c("White subject", "Black subject", "Hispanic subject", "Asian subject")
+col_names_mpd <- c("White officer", "Black officer", "Hispanic officer")
 
-data_df_ind <- as.data.frame(matrix_data_ind)
-rownames(data_df_ind) <- row_names_ind
-colnames(data_df_ind) <- col_names_ind
+data_df_mpd <- as.data.frame(matrix_data_mpd)
+rownames(data_df_mpd) <- row_names_mpd
+colnames(data_df_mpd) <- col_names_mpd
 
-print(data_df_ind)
+print(data_df_mpd)
 ```
 
 ### Setting up the data for Seattle
-```{r, include = FALSE}
+```{r}
 sea_dat_2020 <- sea_dat_2020 %>%
   mutate(datetime = mdy_hms(Occured_date_time)) %>%
   filter(year(datetime) == 2020) %>%
@@ -583,7 +586,7 @@ summary(model_seattle_2020)
 coefplot(model_seattle_2020)
 ```
 ### Setting up the data for Portland
-```{r, include = FALSE}
+```{r}
 pdx_dat_2020 <- pdx_dat_2020 %>%
   filter(Year == 2020) %>%
   mutate_all(~str_replace_all(., "/", "_")) %>%
@@ -645,7 +648,7 @@ summary(model_portland_2020)
 coefplot(model_portland_2020)
 ```
 ### Setting up the data for Indianapolis
-```{r, include = FALSE}
+```{r}
 ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
 
 ind_dat_2020 <- ind_dat_2020 %>%
@@ -695,108 +698,111 @@ ind_dat_2020_final <- cbind(ind_dat_2020, encoded_ind_2020)
 ```
 ### Full regression for Indianapolis
 The results for our regression classifying serious vs non-serious uses of force
-based on officer precinct, subject race, subject gender, and subject age
-for Portland for the year 2020 are  below. For this regression, officer precinct
-is compared to the central precinct, subject race is compared to white, 
-subject sex is compared to male, and subject age is compared to the 18-24 bracket.
-It is important to note that, as in Seattle, some key demographic variables such as
-officer race and gender are not included in the Portland data, which may affect the results of other variables and
-makes this city's results more difficult to compare with the results of other cities.
-
-As in Seattle and DC, the results of this regression also indicate that our hypothesis
-that Black/African American subjects are more likely to be subject to a serious use
-of force may be incorrect. None of the variables for subject race have a 
-statistically significant coefficient, indicating that no one racial
-group is more likely to have forced used against them than any other in Portland.
-
-Other variables do show clear relationships, however. Our results indicate that 
-serious uses of force are more 35% likely to occur in the 
-Detectives Precinct (p = .01), 21% more likely
-to occur in the East Precinct (p = 1.61e-10), 41.5% more likely to occur in the
-K9 precinct (p = .02), and 37% more likely to occur in the TOD precinct 
-(p = .00039). Our results also indicate that women are 17% less likely than men
-to have serious force used against them (p = 8.36e-07), that subject classified 
-as transient are 14% more likely than non-transient subjects to have forced used 
-against them (p = 4.50e-07), and that those aged 66 to 100 are 50% less likely
-to have force used against them (p = .02).
-
-The results for our regression classifying serious vs non-serious uses of force
 based on subject race, subject sex, subject age, officer race, officer sex, and
 officer age for Indiana in 2020 are below. For this regression, race is
-compared to white, sex is compared male, and age is comapred to 18-24
+compared to white, sex is compared male, and age is compared to 18-24.
+
+Indianapolis is the only city in our analysis where our results match our
+initial hypothesis that Black/African American subjects are more likely to be
+subject to a serious use of ofrce than white subjects. Our results indicate that 
+Black/African American subjects are 6% more likely to be subjected to serious
+force than white subjects (p = .006) and that Biracial subjects are 22% more likely
+to be subject to serious force than white subjects (p = 3.11e-05).
+
+Other variables also show a clear relationship with serious force. Our results 
+indicate that women are 6.5% less likely to be subjected to serious force than 
+men (p = .018) and that female officers are 10.5% less likely to use serious force
+than male officers (p = .011). Our results also indicate that citizens aged 
+45 to 54 are 18% more likely to be subjected to serious force than citizens aged
+18-24 (p = 1.14e-07), that officers aged 35 to 44 are 11% more likely to
+use serious force than officers aged 18-24, and that officers aged 45 to 54 are
+13% more likely to use serious force than officers aged 18-24.
 ```{r}
 model_indianapolis_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_2020_final)
 
 summary(model_indianapolis_2020)
 coefplot(model_indianapolis_2020)
 ```
-### Race specific regressions
+### Officer race subsetted regressions for Indianapolis
+#### White officers in Indianapolis
+This regression utilizes the same variables and setup as the full Indianapolis
+regression, but includes only white officers.
+
+Our results indicate that white officers are 19% more likely to use serious 
+force against biracial subjects than white subjects (p = 1.57e-09) and 6.5% more 
+likely to use serious force against Black/African American subjects than
+white subjects (p = .008). Our results also indicate that white officers are 
+12.8% less likely to use force against female subjects than against male 
+subjects (p = .0005). Our results also indicate that white officers aged 35 to 
+44 are 13% more likely to use serious force than those aged 18-24 (p = .0002), 
+as are those aged 34 to 54 (p = .003). Finally, white officers are 17% more
+likely to use serious force against citizens aged 45-54 than those aged 18-24 
+(p = 8.99e-07) and 13% less likely to use force against those aged 55 to 65 (p= .01).
+
+Full results for individual officer race breakdowns for Indianapolis are available under
+"Officer race breakdowns Indianapolis" in the appendix.
 ```{r}
-ind_dat_blackoff <- ind_dat_2020_final %>%
-  filter(OFF_RACE == "Black")
-
-model_ind_blackoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_blackoff)
-
-summary(model_ind_blackoff_2020)
-coefplot(model_ind_blackoff_2020)
-
 ind_dat_whiteoff <- ind_dat_2020_final %>%
   filter(OFF_RACE == "White")
 
 model_ind_whiteoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_whiteoff)
 
 summary(model_ind_whiteoff_2020)
-coefplot(model_ind_whiteoff_2020)
+```
+### Matrix of officer + subject race combination conuts
+Getting the counts
+```{r}
+ind_dat_blackoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "Black")
 
 ind_dat_hispanicoff <- ind_dat_2020_final %>%
   filter(OFF_RACE == "Hispanic")
 
-model_ind_hispanicoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_hispanicoff)
 
-summary(model_ind_hispanicoff_2020)
-coefplot(model_ind_hispanicoff_2020)
+ind_dat_whiteoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_whiteoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_whiteoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
+
+
+ind_dat_blackoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_blackoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_blackoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
+
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "White") %>%
+  nrow()
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "Black") %>%
+  nrow()
+
+ind_dat_hispanicoff %>%
+  filter(RACE == "Hispanic") %>%
+  nrow()
 ```
-### Matrix
+The below matrix shows the combination counts of officer + subject race for
+each possible combination. We analyzed this relationship by developing
+the regressions for specific officer races, as shown above in the regression
+for just white officers in Indianapolis. For the fullr results of those 
+regressions, view "Officer race breakdowns Indianapolis" in the appendix.
 ```{r}
-ind_dat_whiteoff %>%
-  filter(RACE == "White") %>%
-  nrow()
-
-ind_dat_whiteoff %>%
-  filter(RACE == "Black") %>%
-  nrow()
-
-ind_dat_whiteoff %>%
-  filter(RACE == "Hispanic") %>%
-  nrow()
-
-
-ind_dat_blackoff %>%
-  filter(RACE == "White") %>%
-  nrow()
-
-ind_dat_blackoff %>%
-  filter(RACE == "Black") %>%
-  nrow()
-
-ind_dat_blackoff %>%
-  filter(RACE == "Hispanic") %>%
-  nrow()
-
-
-ind_dat_hispanicoff %>%
-  filter(RACE == "White") %>%
-  nrow()
-
-ind_dat_hispanicoff %>%
-  filter(RACE == "Black") %>%
-  nrow()
-
-ind_dat_hispanicoff %>%
-  filter(RACE == "Hispanic") %>%
-  nrow()
-
-
 matrix_data <- matrix(c(
   601, 1659, 63,
   62, 139, 3,
@@ -812,31 +818,37 @@ colnames(data_df) <- col_names
 
 print(data_df)
 ```
-```{r}
-file_path <- "../data/ind_dat_2020_final.csv"
-write.csv(ind_dat_2020_final, file = file_path, row.names = FALSE)
-
-file_path <- "../data/sea_dat_2020_final.csv"
-write.csv(sea_dat_2020_final, file = file_path, row.names = FALSE)
-
-file_path <- "../data/mpd_dat_enc_2020.csv"
-write.csv(mpd_dat_enc_2020, file = file_path, row.names = FALSE)
-
-file_path <- "../data/pdx_dat_2020_final.csv"
-write.csv(pdx_dat_2020_final, file = file_path, row.names = FALSE)
-```
-
 **Discussion:**
 
-Our research fills a gap in the existing literature by exploring the use
-of force in DC specifically, rather than in the US as a whole or other
-metro areas. Other research has explored the implementation of stop and
-frisk in DC, but not the use of force broadly. The history of racialized
-policing in America is long, and its roots lay close to Washington, DC. 
-MPD is uniquely positioned as a majority Black police department in a
-demographically diverse city. By exploring how and which of its officers
-use force, on whom, and where we may build an understanding of trends in
-American policing as a whole. 
+Our research fills a gap in the existing literature by using advanved methods
+to analyze localized police use of force data, rather than focusing on fatal
+use of force based on national data or employing only basic methods, as in 
+city level reports. Our results indicate that our hypothesis that Black/African
+American subjects are more likely to be subjected to serious force is true for
+only one of the cities studied; Indianapolis. Our results also indicate that
+for Indianapolis, white officers are particularly likely to use serious force
+against Black/African American or Biracial subjects. Beyond subject race, the 
+majority of our regressions showed that women and older subjects are less likely
+to have force used against them than men and younger subjects. In addition, 
+certain precincts and districts in each city showed a higher likelihood for force
+to be used. This could be a result of the type of crime or police-subject 
+interactions that occur in this part of the city. If, for example, murders are
+much more common in one district than another, it would make sense that officers
+would be more likely to utilize force in responding to incidents in said district
+than in others.
+
+**Limitations**
+
+Our research is limited primarily by the data itself. As is true for national
+data, collection and reporting is not standardized at the local level. Different
+cities in our study may employ different techniques and standards for when to
+report the use of force. It is also possible that the data is influenced by
+how likely different groups are to report negative interactions with the police. 
+For the data used in this study, if a citizen chooses to report an inappropriate 
+use of force by an officer, that complaint will be added to the dataset. If one
+racial group or gender is more likely to report negative interactions with the
+police, that may skew the data in a way that makes them seem more or less likely
+to be subject to various types of force.
 
 **Appendix**
 All other regression outputs, including our exploration of individual relationships,
@@ -868,6 +880,25 @@ model_mpd_subgender <- glm(serious ~ subject_genderFemale,
                      data = mpd_dat_enc_2020)
 summary(model_mpd_subgender)
 ```
+### Officer race breakdowns DC
+```{r}
+mpd_dat_blackoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "Black_African_American")
+
+model_mpd_blackoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_enc_2020)
+
+summary(model_mpd_blackoff_2020)
+
+mpd_dat_hispanicoff <- mpd_dat_enc_2020 %>%
+  filter(OfficerRace == "Hispanic")
+
+model_dat_hispanicoff_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
+               data = mpd_dat_hispanicoff)
+
+summary(model_dat_hispanicoff_2020)
+```
+
 ### Individual variable/dependent relationships for Seattle.
 ```{r}
 model_seattle_subrace <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races, data = sea_dat_2020_final)
@@ -916,13 +947,31 @@ summary(model_indianapolis_offage)
 model_indianapolis_subage <- glm(serious ~ CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data=ind_dat_2020_final)
 summary(model_indianapolis_subage)
 ```
+## Officer race breakdowns Indianapolis
+```{r}
+ind_dat_blackoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "Black")
 
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+model_ind_blackoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_blackoff)
+
+summary(model_ind_blackoff_2020)
+coefplot(model_ind_blackoff_2020)
+
+
+ind_dat_hispanicoff <- ind_dat_2020_final %>%
+  filter(OFF_RACE == "Hispanic")
+
+model_ind_hispanicoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_hispanicoff)
+
+summary(model_ind_hispanicoff_2020)
+coefplot(model_ind_hispanicoff_2020)
+```
+
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
 **Citation:**
 
-Schwartz G., (2020). Mapping fatal police violence across U.S.
-metropolitan areas: Overall 
+Schwartz G., (2020). Mapping fatal police violence across U.S. metropolitan areas: Overall.
 
 Fryer, R. G. (2019). Risk of being killed by police use of force in the United States by age, race–ethnicity, and sex. Proceedings of the National Academy of Sciences, 116(34), 16793-16798. doi:10.1073/pnas.1821204116
 
@@ -956,7 +1005,7 @@ police use of force in the United States by age, race--ethnicity, and
 sex. Proceedings of the National Academy of Sciences, 116(34),
 16793--16798. <https://doi.org/10.1073/pnas.1821204116>
 
-Report reveals over 1,000 uses of forces by DC Police in 2021 \|
+Report reveals over 1,000 uses of forces by DC Police in 2021
 wusa9.com. (n.d.). Retrieved October 17, 2023, from
 <https://www.wusa9.com/article/news/local/dc/annual-use-of-force-report-dc-police-released-more-than-800-complaints-filed/65-9bc43d2b-059d-43bd-a785-3bed9d6ca858>
 
@@ -970,8 +1019,6 @@ Post.
 
 U.S. Census Bureau QuickFacts: District of Columbia. Accessed October
 17, 2023. <https://www.census.gov/quickfacts/fact/table/DC/PST045222>
-
-\
 
 Velez, M. B., Lyons, C. J., & Santoro, W. A. (2015). The political
 context of the percent black-neighborhood violence link: A multilevel
