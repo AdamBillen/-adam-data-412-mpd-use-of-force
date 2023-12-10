@@ -1,13 +1,14 @@
 ---
-title: "Use of Force Final Report"
+title: "Use of Force Final Project Report"
 author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
-date: "2023-12-09"
-output: pdf_document
+date: "2023-10-17"
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
+  markdown:
+    wrap: 72
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ```{r setup, include=FALSE}
 library(conflicted)
@@ -242,10 +243,85 @@ ggplot(e2_data, aes(x = Subject_Race, fill = factor(serious))) +
   ) +
   scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
 ```
-
 ### Indianapolis, Indiana
 
+In Indianapolis, 52.7% of the population are Whites, 28.5% are Black or African American and 3.82% are Asian. The presence of an 'Unknown' category for subject race suggests that data collection may not be complete or consistently conducted across all incidents. But overall, the "Black" category shows significantly higher number of incidents comparedito other races.
+
+The seriousness of the cases seems to vary across races, but for those races with a significant number of incidents (Black and White categories), non-serious incidents outnumber serious incidents. This could indicate that while the use of force is more commonly reported as non-serious, serious use of force incidents still occur with notable frequency in these populations.
+
+```{r}
+ind_dat <- read_csv("../data/ind_dat_2020_final.csv")
+
+ind_dat$serious <- factor(ind_dat$serious)
+```
+
+
+#### Counts of incidents by subject race
+
+```{r}
+ggplot(data = ind_dat, mapping = aes(x = RACE)) +
+  geom_bar() +
+  labs(title = "Counts of incidents by subject race",
+       x = "Subject Race",
+       y = "Counts")
+```
+Based on the plot, the Blacks are experiencing the most UOF where over 10,000 incidents happened and followed by the White with counts less than 6,000. 
+
+
+#### The Distribution of the officer race use of force frequency.
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = OFF_RACE, fill = RACE)) +
+  geom_bar() +
+  labs(title = "Distribution of the officer race use of force frequency",
+       x = "Office Race",
+       y = "Counts")
+
+```
+In this case, the White officers are using the most use of force in an incident with highest number of Black being targeted. 
+
+#### The counts of serious incidents relative to subject race. 
+
+```{r}
+ggplot(data = ind_dat, mapping = aes(x = RACE, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+Based on the plot, Black experiencing use of force occurred the most, over 10,000 counts. White experiencing almost less than half of the incidents of the Blacks. 
+
+#### The counts of officer gender use of force frequency in relation to the subject race.
+
+```{r}
+
+ggplot(data = ind_dat, mapping = aes(x = SEX, fill = RACE)) +
+ geom_bar() +
+ labs(title = "Distribution of officer gender UOF frequency", x = "Officer gender", y = "Count")
+
+
+```
+This plots shows the distribution of the counts of the use of force cases among male and female officers. From the chart, it appears that there are significantly more incidents involving males officer than females officer.
+
 ### Portland, Oregon
+
+Portland's population is made up of 635,067 of people where 73.8% are White, 5.6% are Black or African American, 8.5% are Asian. Overall, the Whites are experiencing the highest number of incidents in Portland 2020.  
+
+
+```{r}
+port_dat <- read_csv("../data/pdx_dat_2020_final.csv")
+```
+
+#### Histogram of Subject Races and serious incidents
+
+```{r}
+port_dat$serious <- factor(port_dat$serious)
+
+ggplot(data = port_dat, mapping = aes(x = Subject__Race, fill = serious)) +
+ geom_bar() +
+ labs(title = "Histogram of Subject Races and serious incidents", x = "Subject Race", y = "Count")
+```
+
+Based on the plot, the race with the highest number of incidents is White, with a notable number of both serious and not serious incidents. This might due to the reason that Portland's population have over 70% Whites with only 5.6% of Blacks or African American. For all races, there are more incidents that are not serious (0) than serious (1), as indicated by the size of the colored sections.
 
 **Data driven hypotheses:**
 
@@ -260,14 +336,14 @@ to be highly predictive in the model. We also expect some locations and
 districts to be highly predictive, as well as officer race.\
 
 **Results**
-Reading in data
-```{r}
+### Reading in data
+```{r, include = FALSE}
 mpd_dat_2020 <- read.csv('../data/UOF_DC_2020.csv')
 sea_dat_2020 <- read.csv('../data/UOF_Seattle.csv')
 pdx_dat_2020 <- read_csv("../data/UOF_Portland.csv")
 ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
 ```
-Setting up the data for DC
+### Setting up the data for DC
 ```{r, include = FALSE}
 age_breaks <- c(18, 25, 35, 45, 55, 65, 100)
 
@@ -299,7 +375,34 @@ encoded_data_2020 <- model.matrix(~ IncidentDistrict + OfficerGender + OfficerRa
 
 mpd_dat_enc_2020 <- cbind(mpd_dat_2020, encoded_data_2020)
 ```
-DC overall regression
+### DC overall regression 
+The results for our regression classifying serious vs non-serious use of force 
+based on location, officer race, subject age, subject race and subject gender
+in DC for the year 2020 are shown below. For this regression, districts
+are compared to District 1 as the reference, officer and subject race are compared
+to white as the reference, subject age is compared to 18-24 as the reference, and
+subject gender is compared to male as the reference. The negative coefficient
+for subjects aged 55-65, for example, indicates that those in that age bracket
+are less likely to have serious force used against them than those in the 18-24
+age bracket. These "reference" variables are rows in the dataset where a given
+row has all 0s for a given set of variables. This is the result of making our
+categorical variables into dummy variables. 
+
+The results of this regression indicate that our hypothesis that Black/African
+American subject would be more likely to be subject to a serious use of force
+may be incorrect, because the variable for subject race = Black/African American
+has a non-positive P value (.3). This does not, however, indicate that Black/African
+American residents are less likely to have force used against them than white
+subject in general, only that they are not more likely to have serious force
+used against them then white subjects. This is important to understand for our
+analysis of each of the regressions in this study.
+
+Other variables of interest, however, do show significance. In district 5, for
+example, serious force is 1.8% less likely to be used than in district 1 (p = .008).
+Subjects aged 25 to 34 are 2.2% less likely to have serious forced used against them
+than are subjects aged 18-24 (p = .006). Subjects aged 55 to 65 are 5.1% less likely
+to have serious force used against them thatn subjects aged 18-24 (p = .02).
+
 ```{r}
 model_mpd_2020 <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther + OfficerRaceBlack_African_American + OfficerRaceHispanic + OfficerRaceOther + OfficerGenderFemale + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100 + subject_raceBlack_African_American + subject_raceHispanic + subject_genderFemale,
                data = mpd_dat_enc_2020)
@@ -423,8 +526,8 @@ colnames(data_df_ind) <- col_names_ind
 print(data_df_ind)
 ```
 
-Seattle
-```{r}
+### Setting up the data for Seattle
+```{r, include = FALSE}
 sea_dat_2020 <- sea_dat_2020 %>%
   mutate(datetime = mdy_hms(Occured_date_time)) %>%
   filter(year(datetime) == 2020) %>%
@@ -446,24 +549,41 @@ sea_dat_2020$Precinct <- relevel(sea_dat_2020$Precinct, ref = "West")
 encoded_seattle_2020 <- model.matrix(~ Subject_Race + Subject_Gender + Precinct, data = sea_dat_2020)
 
 sea_dat_2020_final <- cbind(sea_dat_2020, encoded_seattle_2020)
+```
+### Overall regression for Seattle
+The results for our regression classifying serious vs non-serious use of force
+based on subject race, subject, gender, and location for Seattle for the year
+2020 are below. For this regression, subject race is compared to white, subject gender
+is compared to male, and precinct is compared to the West precinct. These
+function the same as described in the DC regression. It is important to note
+that key demographic variables such as officer race and gender are not included
+in Seattle's reported data, which may affect the results of other variables and
+makes this city's results more difficult to compare with the results of other cities.
 
+The results of this regression also indicate that our hypopthesis that Black/
+African American subjects would be more likely to be subject to a serious use
+of force may be incorrect. Our results indicate that Black/African American 
+subjects may be 12.3% less likely to be subject to a serious use of force 
+than white subjects (p = 2.45e-07). Our results indicate that Asian subjects
+are 16.6% less likely to be subject to a serious use of force than white
+subjects (p = .007). American Indian/Alaska Native subjects appear to be 21.6%
+less likely to be subject to a serious use of force than white subjects (p = .001).
 
+In terms of other variables, our results indicate that women are 19% less likely
+to be subject to a serious use of force than are men (p = 1.35e-15). Finally,
+the North, South, OJJ, South, and Southwest precincts each appear to be less likely
+to have serious uses of force occur within them than the West precinct. In contrast,
+serious uses of force appear to be 17% more likely to occur in the East precinct,
+where large-scale protests occured, than in the West precinct (p = 2.77e-14).
+
+```{r}
 model_seattle_2020 <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races + Subject_GenderFemale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown + Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest, data = sea_dat_2020_final)
 
 summary(model_seattle_2020)
 coefplot(model_seattle_2020)
-
-model_seattle_subrace <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races, data = sea_dat_2020_final)
-summary(model_seattle_subrace)
-
-model_seattle_subgender <- glm(serious ~ Subject_GenderFemale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown, data = sea_dat_2020_final)
-summary(model_seattle_subgender)
-
-model_seattle_precinct <- glm(serious ~ Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest, data = sea_dat_2020_final)
-summary(model_seattle_precinct)
 ```
-Portland
-```{r}
+### Setting up the data for Portland
+```{r, include = FALSE}
 pdx_dat_2020 <- pdx_dat_2020 %>%
   filter(Year == 2020) %>%
   mutate_all(~str_replace_all(., "/", "_")) %>%
@@ -491,30 +611,41 @@ pdx_dat_2020$AgeBands <- relevel(pdx_dat_2020$AgeBands, ref = "18_24")
 encoded_pdx_2020 <- model.matrix(~ Officer_Precinct + Subject__Race + Subject__Sex + Subject__Transient + AgeBands, data = pdx_dat_2020)
 
 pdx_dat_2020_final <- cbind(pdx_dat_2020, encoded_pdx_2020)
+```
+### Full regression for Portland
+The results for our regression classifying serious vs non-serious uses of force
+based on officer precinct, subject race, subject gender, and subject age
+for Portland for the year 2020 are  below. For this regression, officer precinct
+is compared to the central precinct, subject race is compared to white, 
+subject sex is compared to male, and subject age is compared to the 18-24 bracket.
+It is important to note that, as in Seattle, some key demographic variables such as
+officer race and gender are not included in the Portland data, which may affect the results of other variables and
+makes this city's results more difficult to compare with the results of other cities.
 
+As in Seattle and DC, the results of this regression also indicate that our hypothesis
+that Black/African American subjects are more likely to be subject to a serious use
+of force may be incorrect. None of the variables for subject race have a 
+statistically significant coefficient, indicating that no one racial
+group is more likely to have forced used against them than any other in Portland.
+
+Other variables do show clear relationships, however. Our results indicate that 
+serious uses of force are more 35% likely to occur in the 
+Detectives Precinct (p = .01), 21% more likely
+to occur in the East Precinct (p = 1.61e-10), 41.5% more likely to occur in the
+K9 precinct (p = .02), and 37% more likely to occur in the TOD precinct 
+(p = .00039). Our results also indicate that women are 17% less likely than men
+to have serious force used against them (p = 8.36e-07), that subject classified 
+as transient are 14% more likely than non-transient subjects to have forced used 
+against them (p = 4.50e-07), and that those aged 66 to 100 are 50% less likely
+to have force used against them (p = .02).
+```{r}
 model_portland_2020 <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only + Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown + Subject__SexFemale + Subject__TransientUnknown + Subject__TransientYes + AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100, data = pdx_dat_2020_final)
 
 summary(model_portland_2020)
 coefplot(model_portland_2020)
-
-model_portland_precinct <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only, data = pdx_dat_2020_final)
-summary(model_portland_precinct)
-
-model_portland_race <- glm(serious ~ Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown, data = pdx_dat_2020_final)
-summary(model_portland_race)
-
-model_portland_sex <- glm(serious ~ Subject__SexFemale, data = pdx_dat_2020_final)
-summary(model_portland_sex)
-
-model_portland_transient <- glm(serious ~ Subject__TransientUnknown + Subject__TransientYes, data = pdx_dat_2020_final)
-summary(model_portland_transient)
-
-model_portland_age <- glm(serious ~ AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100, data = pdx_dat_2020_final)
-summary(model_portland_age)
-
 ```
-Indianapolis
-```{r}
+### Setting up the data for Indianapolis
+```{r, include = FALSE}
 ind_dat_2020 <- read_csv("../data/UOF_Indianapolis.csv")
 
 ind_dat_2020 <- ind_dat_2020 %>%
@@ -561,12 +692,46 @@ ind_dat_2020$CIT_AGE_BANDS <- relevel(ind_dat_2020$CIT_AGE_BANDS, ref = "18_24")
 encoded_ind_2020 <- model.matrix(~ RACE + SEX + OFF_RACE + OFF_SEX + OFF_AGE_BANDS + CIT_AGE_BANDS, data = ind_dat_2020)
 
 ind_dat_2020_final <- cbind(ind_dat_2020, encoded_ind_2020)
+```
+### Full regression for Indianapolis
+The results for our regression classifying serious vs non-serious uses of force
+based on officer precinct, subject race, subject gender, and subject age
+for Portland for the year 2020 are  below. For this regression, officer precinct
+is compared to the central precinct, subject race is compared to white, 
+subject sex is compared to male, and subject age is compared to the 18-24 bracket.
+It is important to note that, as in Seattle, some key demographic variables such as
+officer race and gender are not included in the Portland data, which may affect the results of other variables and
+makes this city's results more difficult to compare with the results of other cities.
 
+As in Seattle and DC, the results of this regression also indicate that our hypothesis
+that Black/African American subjects are more likely to be subject to a serious use
+of force may be incorrect. None of the variables for subject race have a 
+statistically significant coefficient, indicating that no one racial
+group is more likely to have forced used against them than any other in Portland.
+
+Other variables do show clear relationships, however. Our results indicate that 
+serious uses of force are more 35% likely to occur in the 
+Detectives Precinct (p = .01), 21% more likely
+to occur in the East Precinct (p = 1.61e-10), 41.5% more likely to occur in the
+K9 precinct (p = .02), and 37% more likely to occur in the TOD precinct 
+(p = .00039). Our results also indicate that women are 17% less likely than men
+to have serious force used against them (p = 8.36e-07), that subject classified 
+as transient are 14% more likely than non-transient subjects to have forced used 
+against them (p = 4.50e-07), and that those aged 66 to 100 are 50% less likely
+to have force used against them (p = .02).
+
+The results for our regression classifying serious vs non-serious uses of force
+based on subject race, subject sex, subject age, officer race, officer sex, and
+officer age for Indiana in 2020 are below. For this regression, race is
+compared to white, sex is compared male, and age is comapred to 18-24
+```{r}
 model_indianapolis_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown + SEXFemale + OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther + OFF_SEXFemale + OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100 + CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data = ind_dat_2020_final)
 
 summary(model_indianapolis_2020)
 coefplot(model_indianapolis_2020)
-
+```
+### Race specific regressions
+```{r}
 ind_dat_blackoff <- ind_dat_2020_final %>%
   filter(OFF_RACE == "Black")
 
@@ -590,26 +755,8 @@ model_ind_hispanicoff_2020 <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHisp
 
 summary(model_ind_hispanicoff_2020)
 coefplot(model_ind_hispanicoff_2020)
-
-model_indianapolis_subrace <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown, data=ind_dat_2020_final)
-summary(model_indianapolis_subrace)
-
-model_indianapolis_subsex <- glm(serious ~ SEXFemale, data=ind_dat_2020_final)
-summary(model_indianapolis_subsex)
-
-model_indianapolis_offrace <- glm(serious ~  OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther, data=ind_dat_2020_final)
-summary(model_indianapolis_offrace)
-
-model_indianapolis_offsex <- glm(serious ~ OFF_SEXFemale, data=ind_dat_2020_final)
-summary(model_indianapolis_offsex)
-
-model_indianapolis_offage <- glm(serious ~ OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100, data=ind_dat_2020_final)
-summary(model_indianapolis_offage)
-
-model_indianapolis_subage <- glm(serious ~ CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data=ind_dat_2020_final)
-summary(model_indianapolis_subage)
 ```
-
+### Matrix
 ```{r}
 ind_dat_whiteoff %>%
   filter(RACE == "White") %>%
@@ -696,7 +843,7 @@ All other regression outputs, including our exploration of individual relationsh
 are included below. We did this in order to make the results section smaller
 and easier to read.
 
-Individual variable/dependent relationships for DC.
+### Individual variable/dependent relationships for DC.
 ```{r}
 model_mpd_district <- glm(serious ~ IncidentDistrict2D + IncidentDistrict3D + IncidentDistrict4D + IncidentDistrict5D + IncidentDistrict6D + IncidentDistrictOther,
                data = mpd_dat_enc_2020)
@@ -721,7 +868,54 @@ model_mpd_subgender <- glm(serious ~ subject_genderFemale,
                      data = mpd_dat_enc_2020)
 summary(model_mpd_subgender)
 ```
+### Individual variable/dependent relationships for Seattle.
+```{r}
+model_seattle_subrace <- glm(serious ~ Subject_RaceAsian + Subject_RaceBlack_or_African_American + Subject_RaceHispanic_or_Latino + Subject_RaceAmerican_Indian_Alaska_Native + Subject_RaceNat_Hawaiian_Oth_Pac_Islander + Subject_RaceNot_Specified + Subject_RaceTwo_or_More_Races, data = sea_dat_2020_final)
+summary(model_seattle_subrace)
 
+model_seattle_subgender <- glm(serious ~ Subject_GenderFemale + Subject_GenderNon_binary + Subject_GenderOther + Subject_GenderTransgender_Female + Subject_GenderTransgender_Male + Subject_GenderUnknown, data = sea_dat_2020_final)
+summary(model_seattle_subgender)
+
+model_seattle_precinct <- glm(serious ~ Precinct0 + PrecinctEast + PrecinctNorth + PrecinctOOJ + PrecinctSouth + PrecinctSouthwest, data = sea_dat_2020_final)
+summary(model_seattle_precinct)
+```
+### Individual variable/dependent relationships for Portland.
+```{r}
+model_portland_precinct <- glm(serious ~ Officer_PrecinctDetectives + Officer_PrecinctEast_Precinct + Officer_PrecinctFamily_Services + Officer_PrecinctK9 + Officer_PrecinctNorth_Precinct + Officer_PrecinctSERT + Officer_PrecinctTOD + Officer_PrecinctTraffic + Officer_PrecinctTraining + Officer_PrecinctTransit_PPB_Only, data = pdx_dat_2020_final)
+summary(model_portland_precinct)
+
+model_portland_race <- glm(serious ~ Subject__RaceBlack + Subject__RaceHispanic + Subject__RaceNative_American + Subject__RaceUnknown, data = pdx_dat_2020_final)
+summary(model_portland_race)
+
+model_portland_sex <- glm(serious ~ Subject__SexFemale, data = pdx_dat_2020_final)
+summary(model_portland_sex)
+
+model_portland_transient <- glm(serious ~ Subject__TransientUnknown + Subject__TransientYes, data = pdx_dat_2020_final)
+summary(model_portland_transient)
+
+model_portland_age <- glm(serious ~ AgeBands25_34 + AgeBands35_44 + AgeBands45_54 + AgeBands55_65 + AgeBands66_100, data = pdx_dat_2020_final)
+summary(model_portland_age)
+```
+## Individual variable/dependent relationships for Indianapolis
+```{r}
+model_indianapolis_subrace <- glm(serious ~ RACEBi_racial + RACEBlack + RACEHispanic + RACEUnknown, data=ind_dat_2020_final)
+summary(model_indianapolis_subrace)
+
+model_indianapolis_subsex <- glm(serious ~ SEXFemale, data=ind_dat_2020_final)
+summary(model_indianapolis_subsex)
+
+model_indianapolis_offrace <- glm(serious ~  OFF_RACEBlack + OFF_RACEHispanic + OFF_RACEOther, data=ind_dat_2020_final)
+summary(model_indianapolis_offrace)
+
+model_indianapolis_offsex <- glm(serious ~ OFF_SEXFemale, data=ind_dat_2020_final)
+summary(model_indianapolis_offsex)
+
+model_indianapolis_offage <- glm(serious ~ OFF_AGE_BANDS25_34 + OFF_AGE_BANDS35_44 + OFF_AGE_BANDS45_54 + OFF_AGE_BANDS55_65 + OFF_AGE_BANDS66_100, data=ind_dat_2020_final)
+summary(model_indianapolis_offage)
+
+model_indianapolis_subage <- glm(serious ~ CIT_AGE_BANDS25_34 + CIT_AGE_BANDS35_44 + CIT_AGE_BANDS45_54 + CIT_AGE_BANDS55_65, data=ind_dat_2020_final)
+summary(model_indianapolis_subage)
+```
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
@@ -783,139 +977,3 @@ Velez, M. B., Lyons, C. J., & Santoro, W. A. (2015). The political
 context of the percent black-neighborhood violence link: A multilevel
 analysis. Social Problems, 62(1), 93--119.
 <https://doi.org/10.1093/socpro/spu005>
-
-
-
-
-
-# Use of Force Final Report DATA 412/612
-
-Lit review
-
-## Exploratory Data Analysis
-
-```{r}
-library(tidyverse)
-library(conflicted)
-library(dplyr)
-library(ggthemes)
-library(ggplot2)
-library(tibble)
-```
-
-```{r}
-setwd("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force")
-list.files()
-
-```
-
-### Washington, DC
-
-#### 1. Distribution of Incident Counts by Subject Race
-
-Black/ African American have a significantly higher amount of incident counts in 2020.
-
-Conversely, Asian/Pacific Islander individuals appear to experience the least instances of use of force.
-
-```{r}
-df <- read.csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_DC_2020.csv")
-mpd_dat <- df
-ggplot(data = mpd_dat, mapping = aes(x = subject_race)) + 
-  geom_bar()
-```
-
-#### 2. UOF Incident Counts by District and Subject Race
-
-Across all districts in DC, it is prevalent that Black/African Americans experience UOF at a higher rate than their counterparts.
-
-7th District has the highest total UOF incidents out of all the DC districts.
-
-```{r}
-force_by_district_race <- mpd_dat %>%
-group_by(OfficerAssignment, subject_race) %>% summarize(Total_Use_of_Force = n()) #total num of cases of use of force
-
-ggplot(subset(force_by_district_race, OfficerAssignment %in% c("1D", "2D", "3D", "4D", "5D", "6D", "7D")), 
-       aes(x = OfficerAssignment, y = Total_Use_of_Force, fill = subject_race)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Use of Force Incidents by District") +
-  xlab("Districts") +
-  ylab("Total Use of Force Incidents")
-```
-
-#### 3. Use of Force by District.
-
-1D, 2D, and 3D are posed to be the safest districts in DC, whereas 7D is deemed to be the most dangerous.
-
-```{r}
-districts <- c("1D", "2D", "3D", "4D", "5D", "6D", "7D")
-mpd_dat_filtered <- mpd_dat[mpd_dat$OfficerAssignment %in% districts, ]
-
-uof_counts <- mpd_dat_filtered %>%
-  group_by(OfficerAssignment) %>%
-  summarise(Count = n())
-
-ggplot(uof_counts, aes(x = OfficerAssignment, y = Count)) +
-  geom_bar(stat = "identity") +
-  labs(title = "Use of Force by District",
-       x = "District",
-       y = "Count")
-```
-
-### Seattle, Washington
-
-```{r include=FALSE}
-library(readr)
-seattle_2020 <- read_csv("/Users/kaylhangarcia/Desktop/DATA_412/data412_project/final_project/data-412-mpd-use-of-force/data/UOF_Seattle.csv")
-
-seattle_2020 <- seattle_2020 %>%
-  mutate(datetime = mdy_hms(Occured_date_time)) %>%
-  filter(year(datetime) == 2020) %>%
-  drop_na(Incident_Type, Subject_Race, Subject_Gender, Precinct, Sector, Beat) %>%
-  mutate(serious = ifelse(Incident_Type == "Level 1 - Use of Force", 0, 1))
-```
-
-#### 4. Distribution of Incident Types by Subject Race
-
-There is a huge amount of \'Not Specified\' values for this data visualization during the year 2020.
-
-White people have a shared count amount of serious incidents regarding use of force my the police department.
-
-The next following group that stands out is \'Black or African American,\' with level 1 - Use of Force being greater than the other levels.
-
-```{r}
-ggplot(seattle_2020, aes(x = Subject_Race, fill = factor(serious))) +
-  geom_bar(position = "stack") +
-  labs(
-    title = "Distribution of Incident Types by Subject Race",
-    x = "Subject Race",
-    y = "Count",
-    fill = "Incident Type"
-  ) +
-  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
-```
-
-#### 5. Comparative Analysis: Incidents in E2 by Subject Race
-
-E2 has the highest amount of incidents across all the other beats in Seattle. There are a total of 52 beats reported in the dataset.
-
-Many of the \'Subject Race\' is left unreported or \'Not Specified\' in the year 2020. The next leading race that are subjected to incidents in the E2 beat are White, then it is Black or African American.
-
-It is notable to mention that many of the serious incidents are reported as \'Not Specified\' in the E2 beat.
-
-```{r}
-e2_data <- subset(seattle_2020, Beat == "E2")
-
-ggplot(e2_data, aes(x = Subject_Race, fill = factor(serious))) +
-  geom_bar(position = "dodge", stat = "count") +
-  labs(
-    title = "Distribution of Incidents in E2 Beat",
-    x = "Subject Race",
-    y = "Count",
-    fill = "Serious Incident"
-  ) +
-  scale_fill_manual(values = c("0" = "green", "1" = "red"), name = "Serious Incident")
-```
-
-### Indianapolis, Indiana
-
-### Portland, Oregon
