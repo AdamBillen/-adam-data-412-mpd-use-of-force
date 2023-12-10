@@ -195,17 +195,17 @@ mpd_dat_hispanicoff %>%
   filter(subject_race == "Hispanic") %>%
   nrow()
 
-matrix_data_ind <- matrix(c(
+matrix_data_mpd <- matrix(c(
   55, 50, 14,
   800, 757, 181,
   2, 2, 0,
   17, 7, 7
 ), ncol = 3, byrow = TRUE)
 
-row_names_ind <- c("White subject", "Black subject", "Hispanic subject", "Asian subject")
+row_names_mpd <- c("White subject", "Black subject", "Hispanic subject", "Asian subject")
 col_names_ind <- c("White officer", "Black officer", "Hispanic officer")
 
-data_df_ind <- as.data.frame(matrix_data_ind)
+data_df_mpd <- as.data.frame(matrix_data_ind)
 rownames(data_df_ind) <- row_names_ind
 colnames(data_df_ind) <- col_names_ind
 
