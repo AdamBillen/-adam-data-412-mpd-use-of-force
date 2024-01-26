@@ -1,0 +1,28 @@
+---
+title: "Persons Contributions"
+author: "Kaylhan Garcia, Adam Billen, and Phoebe Lin"
+date: "2023-12-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Contributions to the Data Project
+
+## Kaylhan Garcia
+
+I created the github, organized our files to stay tidy, did the Seattle and MPD exploratory data analysis, and the presentation (I created the slides, added necessary information that I have conducted), and contributed to the intro/lit review.
+
+Here is the GitHub link so you can see each member's contribution throughout the semester on this project: <https://github.com/kerawyd/data-412-mpd-use-of-force>
+
+## Adam Billen
+
+I cleaned all of our data, created the new serious/non-serious variable, conducted all of our regressions, wrote all of the analysis for the results and discussion section,
+and contributed to the introduction/literature review. I built the results and the introduction slides for the presentation.
+
+## Phoebe Lin
+
+I did all of the EDA and necessary additional cleaning for Portland and Indianapolis, wrote the majority of the introduction/literature review, contributed
+my EDA to the presentation, and helped with the intro/lit review slides for the presentation.
