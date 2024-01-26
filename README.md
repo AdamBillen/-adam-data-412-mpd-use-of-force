@@ -1,2 +1,1 @@
-# data-412--use-of-force
-Use of Force DATA-412 Final Project
+# A multi-year comparative analysis of police use of force across Seattle, Portland, DC and Indiana.
